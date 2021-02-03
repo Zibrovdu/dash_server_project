@@ -29,8 +29,10 @@ venv/
 env/
 
 .bash_history/
+.bash_history
 .cache/
 .gitconfig/
+.gitconfig
 .ssh/
 __pycache__/
 *.ini
