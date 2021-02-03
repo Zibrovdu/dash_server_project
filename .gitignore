@@ -27,3 +27,11 @@ include/*
 
 venv/
 env/
+
+.bash_history/
+.cache/
+.gitconfig/
+.ssh/
+__pycache__/
+*.ini
+*.sock
