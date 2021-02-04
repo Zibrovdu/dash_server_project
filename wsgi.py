@@ -1,9 +1,9 @@
 from app import create_app
 
-server = create_app()
+application = create_app()
 
 if __name__ == "__main__":
-    server.run(host='0.0.0.0')
+    application.run()
 
 
 # from test_app import server as application
