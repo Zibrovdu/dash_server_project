@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if current_user.is_anonymous %}
+  <h1>Hello, stranger!</h1>
+{% else  %}
+  <h1>Hi, {{ current_user.username }}!</h1>
+  <a href="{{ url_for('/dashboard/') }}" class="btn btn-warning">Dashboard</a>
+{% endif %}
+{% endblock %}
