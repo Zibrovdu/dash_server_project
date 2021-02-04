@@ -1,4 +1,4 @@
-from test_app import app as application
+from test_app import server as application
 
 if __name__ == "__main__":
-    application.run_server(host='0.0.0.0')
+    application.run()

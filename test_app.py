@@ -133,6 +133,7 @@ fig_site_top2.update_layout(title_text="Посетители", paper_bgcolor='#e
 
 external_stylesheets = ['assets/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, title='Отдел сопровождения пользователей')
+server = app.server
 # conf = app.config
 # print(conf)
 
