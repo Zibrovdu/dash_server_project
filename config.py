@@ -16,6 +16,5 @@ db_dialect = cfg_parser['connect']['dialect']
 
 class BaseConfig:
     SQLALCHEMY_DATABASE_URI = f'{db_dialect}://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}'
-    print(SQLALCHEMY_DATABASE_URI)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'my secret key'
