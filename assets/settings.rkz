@@ -1,0 +1,28 @@
+[metrika]
+token = AgAAAAACKAEhAAY_GkrKP2DOlEeQpPcBwV68CMc
+
+[user_1]
+username = user_1
+password = zima2021
+
+[user_2]
+username = user_2
+password = leto2021
+
+[user_3]
+username = user_3
+password = vesna2021
+
+[connect]
+username = postgres
+password = 6002815
+dialect = postgresql
+db = passport_mbufk
+host = localhost
+port = 5432
+
+[schemas]
+etsp_support = etsp
+sue_support = sue
+osp_support = osp
+employees = employees
