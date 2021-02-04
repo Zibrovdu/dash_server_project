@@ -4,7 +4,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class BaseConfig:
-    SQLALCHEMY_DATABASE_URI = 'postgres://postgres:6002815@192.168.1.4:5432/test'
+    SQLALCHEMY_DATABASE_URI = 'postgres://mbu_user:qwer@localhost:5432/mbu_user'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'my secret key'
-    engine = create_engine('postgres://postgres:6002815@192.168.1.4:5432/test')
+    engine = create_engine('postgres://mbu_user:qwer@localhost:5432/mbu_user')
