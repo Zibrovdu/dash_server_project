@@ -37,3 +37,4 @@ env/
 __pycache__/
 *.ini
 *.sock
+.psql_history
