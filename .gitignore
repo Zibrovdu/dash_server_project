@@ -4,6 +4,7 @@ assets/*.xlsx
 assets/*.xls
 *.rkz
 assets/*.rkz
+app/*.rkz
 \.logs
 \.log
 *.log
