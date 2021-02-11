@@ -29,9 +29,6 @@ date1 = ld.GetPeriod(ld.current_year, ld.current_week, 's')[0]
 date2 = ld.GetPeriod(ld.current_year, ld.current_week, 's')[1]
 metrika_df = si.get_site_info(date1, date2)
 
-# graph_data_df = si.get_data_for_graph(metrika_df)
-# site_visits_graph(graph_data_df)
-
 tab_selected_style = dict(backgroundColor='#ebecf1', fontWeight='bold')
 
 choice_type = [dict(label='Неделя', value='w'),
@@ -226,7 +223,7 @@ layout = html.Div([
                                                                                            'Глубина просмотра',
                                                                                            'Время на сайте']],
                                                    style_table={'height': '150px'},
-                                                   fixed_rows={'headers': True},
+                                                   # fixed_rows={'headers': True},
                                                    style_as_list_view=True,
                                                    cell_selectable=False,
                                                    tooltip_data=[

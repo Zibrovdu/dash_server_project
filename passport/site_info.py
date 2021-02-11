@@ -22,7 +22,7 @@ def get_site_info(start_date, end_date):
     lw.log_writer(f"server response code {response.status_code}")
 
     metrika_data = response.json()
-    lw.log_writer(f"Data load successfully, total row loaded: {metrika_data['total_rows']}")
+    # lw.log_writer(f"Data load successfully, total row loaded: {metrika_data['total_rows']}")
 
     if response.status_code != 200 or metrika_data['total_rows'] == 0:
         metrika_df = pd.DataFrame(

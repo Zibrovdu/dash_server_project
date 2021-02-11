@@ -5,7 +5,10 @@ import pandas as pd
 from sqlalchemy import create_engine
 import passport.load_cfg as lc
 
-engine = create_engine(f'{lc.db_dialect}://{lc.db_username}:{lc.db_password}@{lc.db_host}:{lc.db_port}/{lc.db_name}')
+engine = create_engine(f'{lc.db_dialect}://postgres:12345@localhost:{lc.db_port}/{lc.db_name}')
+
+print(lc.db_password)
+print(engine)
 
 current_month = date.today().month
 current_day = date.today().day
@@ -18,21 +21,21 @@ end_year = (date.today() - timedelta(days=7)).year
 
 
 def LoadEtspData():
-    df = pd.read_sql('''select * from etsp.etsp_data_correct''', con=engine)
+    df = pd.read_sql('''select * from etsp_data''', con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
 
 
 def LoadSueData():
-    df = pd.read_sql('''select * from sue.sue_data''', con=engine)
+    df = pd.read_sql('''select * from sue_data''', con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
 
 
 def LoadOspData():
-    df = pd.read_sql('''select * from osp.osp_data''', con=engine)
+    df = pd.read_sql('''select * from osp_data''', con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
