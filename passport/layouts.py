@@ -7,7 +7,6 @@ import dash_table
 import dash_daq as daq
 import passport.load_data as ld
 import passport.site_info as si
-import passport.figures as pf
 
 etsp_df = ld.LoadEtspData()
 etsp_top_user_df = ld.TopUser(etsp_df)
@@ -38,6 +37,13 @@ choice_type = [dict(label='Неделя', value='w'),
 d_month = ld.GetMonths(start_month, start_year, finish_month, finish_year)
 
 d_week = ld.GetWeeks(start_week, start_year, finish_week, finish_year)
+
+tooltips_table_site = [{'Визиты': 'Суммарное количество визитов.', 'Посетители': 'Количество уникальных посетителей.',
+                        'Просмотры': 'Число просмотров страниц на сайте за выбранный период.',
+                        'Отказы': 'Доля визитов, в рамках которых состоялся лишь один просмотр страницы, продолжавшийся'
+                                  ' менее 15 секунд.',
+                        'Глубина просмотра': 'Количество страниц, просмотренных посетителем во время визита.',
+                        'Время на сайте': 'Средняя продолжительность визита в минутах и секундах.'}]
 
 projects_df = ld.load_projects()
 projects_names = [{"label": i[0], "value": i[1]} for i in projects_df[['name', 'id']].values]
@@ -89,7 +95,7 @@ layout = html.Div([
                                                 updatemode='bothdates',
                                                 style=dict(background='#b1d5fa'),
                                                 clearable=False
-                                                # with_portal=True,
+                                                # with_portal=True
                                                 )])], className='bblock',
                  style=dict(heigth='45px')),  # Period_choice range picker
     ], style=dict(background='#b1d5fa')),
@@ -223,33 +229,19 @@ layout = html.Div([
                                                                                            'Глубина просмотра',
                                                                                            'Время на сайте']],
                                                    style_table={'height': '150px'},
-                                                   # fixed_rows={'headers': True},
                                                    style_as_list_view=True,
                                                    cell_selectable=False,
-                                                   tooltip_data=[
-                                                       {
-                                                           'Визиты': 'Суммарное количество визитов.',
-                                                           'Посетители': 'Количество уникальных посетителей.',
-                                                           'Просмотры': 'Число просмотров страниц на сайте за '
-                                                                        'выбранный период.',
-                                                           'Отказы': 'Доля визитов, в рамках которых состоялся лишь '
-                                                                     'один просмотр страницы, продолжавшийся менее 15'
-                                                                     ' секунд.',
-                                                           'Глубина просмотра': 'Количество страниц, просмотренных '
-                                                                                'посетителем во время визита.',
-                                                           'Время на сайте': 'Средняя продолжительность визита в '
-                                                                             'минутах и секундах. '
-                                                       }],
+                                                   tooltip_data=tooltips_table_site,
                                                    tooltip_duration=None,
                                                    style_cell=dict(textAlign='center',
                                                                    overflow='hidden',
                                                                    textOverflow='ellipsis',
                                                                    maxWidth=0))],
                              style=dict(width='90%', padding='0 5%', fontSize='2em')),
-                    html.Div([html.H3('Рейтинг посещаемости разделов сайта за 2020 год', style=dict(padding='20px'))]),
+                    html.Div([html.H3('Рейтинг посещаемости разделов сайта', style=dict(padding='20px'))]),
                     html.Div([dcc.Graph(id='site_top_fig')]),
-                    html.Div([dcc.Graph(id='site_top_fig2', figure=pf.fig_site_top2)]),
-                    html.Div([dcc.Graph(id='site_top_fig3', figure=pf.fig_site_top3)]),
+                    html.Div([dcc.Graph(id='site_line_graph')]),
+                    html.Div([dcc.Graph(id='el_budget_graph')]),
                 ], selected_style=tab_selected_style),  # tab site
                 dcc.Tab(label='Проекты', value='pr', children=[
                     html.Br(),

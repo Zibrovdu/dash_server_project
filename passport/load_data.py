@@ -5,10 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import passport.load_cfg as lc
 
-engine = create_engine(f'{lc.db_dialect}://postgres:12345@localhost:{lc.db_port}/{lc.db_name}')
-
-print(lc.db_password)
-print(engine)
+engine = create_engine(f'{lc.db_dialect}://{lc.db_username}:{lc.db_password}@{lc.db_host}:{lc.db_port}/{lc.db_name}')
 
 current_month = date.today().month
 current_day = date.today().day
@@ -107,158 +104,6 @@ def GetTimePeriods(etsp_df, sue_df, osp_df):
 
     return dict(week=[min(start_weeks_list), max(end_weeks_list)], month=[min(start_month_list), max(end_month_list)],
                 year=[min(start_year_list), max(end_year_list)])
-
-
-def GetIntent(df):
-    pd.options.mode.chained_assignment = None
-
-    df['Описание'] = df['Описание'].fillna('missed value')
-    df['Описание'] = df['Описание'].apply(lambda x: str(x).lower())
-
-    temp_df = pd.DataFrame(columns=['num', 'text', 'intent'])
-    for i in range(len(df)):
-        temp_df.loc[i] = i, df['Описание'].loc[i], ''
-
-    conf = {
-        'intents': {
-            "1С ЭБ": ['эб', 'элбюджету', 'элбюджета', 'эб', 'элбюджета', ' 1с ', ' 1c ', 'базу 1с ', ' систему 1с ',
-                      ' 1c ', 'электронным бюджетом', 'не заходит в 1с', '1с,', 'в 1с, ', '1с:предприятие', '1с:п',
-                      '1 c ', '1с-облако', 'электронный бюджет', '-1с', 'эл.бюджет', '1с.', 'в 1с.', '1с в', ' с 1с',
-                      'эл.бюджет', ' работает 1 с ', 'базе 1 с', 'бюджету', 'электронный', 'бюджет'],
-            'ЛанДокс': ['lan docs', 'ландокс', 'лан докс', 'landocs', 'лаандокс'],
-            'ЗКВС': ['звкс', 'зквс', 'vdi', 'getmobit', ' закрытый контур', 'контур'],
-            'Электронная почта': ['почта ', 'аутлук', 'сбросить', 'пароль от почты', 'пароль от пя', ' входом почту',
-                                  'сменить пароль', 'пароля от уз', 'действия пароля', ' востановить пароль',
-                                  'изменить пароль', 'обновить пароль', 'нового правила', 'настроить почту',
-                                  'почта работает', 'работает почт', 'outlook', 'почтой', 'правила почты',
-                                  'правило почты', 'аутлук', 'настройка почты', 'подключение почты ', 'почты',
-                                  'работает аутлук', 'почтовый ящик', 'почтового ящика', 'оутлук', 'настройка почты ',
-                                  'отправляется письмо ', 'сменить пароль'],
-            'настройка ЭП': [' эп ', 'эцп', 'эцпп', 'эцп', 'эцп', 'эцпп', 'эцп ', 'новую эп', 'настроить криптопро',
-                             'криптопро', ' лицензию крипто', 'криптоарм', 'крипто арм ', 'эцпп'],
-            'не работают базы (ПУиОТ)': ['пуиот', 'пу и от'],
-            'установка 1С «Тонкий Клиент»': ['тонкий', 'клиент', 'тонкие', 'клиенты', 'tionix', 'thinclient',
-                                             ' тонкий клиент', 'документы печать'],
-            'установка банк-клиент': ['банк-клиент'],
-            'не работает СУЭ ФК': ['суэ фк', 'суэ'],
-            'Доступ': ['доступ ', 'доступа ', 'могу войти', 'войти', 'зайти на диск', 'не могу зайти',
-                       'ошибки при входе', 'не дает зацти', 'получается зайти', 'не дает зайти',
-                       'предоставить логин и пароль', 'сетевых', 'папок', 'диске', 'ресурсу', 'ресурс', 'сетевой',
-                       'папке', 'папку', 'общий', 'диск', 'сетевую папку', 'сетевая папка', 'сетевым папкам',
-                       'работает интернет', 'интернетом', ' доступ сайт', 'wi fi', 'настройка доступа',
-                       'доступа интернет', ' доступ сайту', 'wifi', 'нету интернета', 'доступ порталу', 'работает сайт',
-                       'подключения интернету', ' портала'],
-            'Органайзер': ['органайзер', 'БГУ ', ' ЗКГУ ', 'модуль бухгалтерия', 'ошибка крипто провайдера ',
-                           'не установлено расширение'],
-            'ПУР': ['пур', 'п у р'],
-            'ПУИО': ['пуио', 'пу и о'],
-            'ПУОТ': ['пуот', 'пу о т '],
-            'не подписывается документ': ['не может подписать', 'подписью', 'возможности подписать',
-                                          'ошибка при подписании', 'документ не удается', 'подписать документ',
-                                          'подписывает документ', 'подписать документы', 'jinn', 'client', 'стороннее',
-                                          ' cisco ', ' jinn ', ' справкибк', ' справки бк', ' впн клиента ', ' cisco ',
-                                          ' jinn ', ' справкибк', ' справки бк', ' впн клиента '],
-            'Настройка печати': ['пинкод ', ' pin ', 'инкод ', ' пин ', 'код доступа', 'пин-код', 'печаль',
-                                 'пикод печати', 'код использования', 'принтеры', 'настройка печати', 'печатается файл',
-                                 'доступ принтеру', 'настроить печать', 'документов печать', 'подключить принтер',
-                                 'печати ', 'печатью ', 'пароль печати'],
-            'Замена РМ': ['тонер', 'мало', 'картридж', 'картриджа', 'пурпурный', 'замяло бумагу', 'зажевывает',
-                          'зажевал'],
-            'Работа с техникой': ['вкл пк', ' монитор ', ' спящего ', ' режима ', ' включается ', 'завис пк',
-                                  ' сломался', 'мышки', 'клавиатура ', ' мышь ', ' kvm ', ' свитч ', ' переключатель ',
-                                  'switch', ' nd телефон '],
-            'Перемещение рабочих мест': ['переноса', 'переноса рабоч', 'перенос мест', 'перенести рабочее',
-                                         'переместить с', 'переместить сотрудника', 'перенос ', ' пересадить '],
-            'скуд': ['скуд', 'замок'],
-            'консультант +': ['консультант +', 'консультантплюс', 'консультант+', ' консультант', 'консультанте плюс '],
-            'Новый сотрудник': ['полная', 'первичная', 'сотруднику', 'организовать', 'рабочее', 'полная', 'организация',
-                                'нового', 'организация рабоч', 'создать учетную запись'],
-        }
-    }
-
-    for item, value in conf['intents'].items():
-        for i in value:
-            mask = temp_df['text'].str.contains(i)
-            temp_df.loc[mask, 'intent'] = item
-
-    df3 = temp_df[temp_df.loc[:, 'intent'] == '1С ЭБ']
-    mask = df3['text'].str.contains('работает')
-    df3.loc[mask, 'intent'] = 'не работает (1С ЭБ)'
-
-    df4 = temp_df[temp_df['intent'] == 'ЛанДокс']
-    mask = df4['text'].str.contains('настроить ')
-    df4.loc[mask, 'intent'] = 'настроить ЛанДокс'
-
-    df5 = temp_df[temp_df['intent'] == 'ЗКВС']
-    mask = df5['text'].str.contains('работает', 'установка')
-    df5.loc[mask, 'intent'] = 'установка (не работает) ЗКВС'
-
-    total_df = df3.append(df5[df5.intent == 'установка (не работает) ЗКВС'])
-
-    df5 = df5[df5.intent == 'ЗКВС']
-
-    df6 = df5.append(df4)
-
-    mask = df6['text'].str.contains('настроить ')
-    df6.loc[mask, 'intent'] = 'настроить (ЛанДокс, ЗКВС)'
-
-    total_df = total_df.append(df6[df6.intent == 'настроить (ЛанДокс, ЗКВС)'])
-    total_df = total_df.append(df6[df6.intent == 'ЛанДокс'])
-
-    df7 = df6[df6.intent == 'ЗКВС'].append(temp_df[temp_df['intent'] == 'Электронная почта'])
-
-    mask = df7['text'].str.contains('сброс', 'парол')
-    df7.loc[mask, 'intent'] = 'сброс пароля (почта, ЗКВС)'
-
-    total_df = total_df.append(df7)
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'ПУИО'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'ПУР'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'ПУОТ'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Органайзер'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Доступ'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'не работает СУЭ ФК'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'настройка ЭП'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'не работают базы (ПУиОТ)'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'не подписывается документ'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'установка 1С «Тонкий Клиент»'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'консультант +'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Новый сотрудник'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Настройка печати'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Работа с техникой'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Замена РМ'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'скуд'])
-
-    total_df = total_df.append(temp_df[temp_df['intent'] == 'Перемещение рабочих мест'])
-
-    temp_df1 = temp_df.drop(list(total_df.num), axis=0)
-    temp_df1.intent = 'Прочие обращения'
-    total_df = total_df.append(temp_df1)
-
-    df.reset_index(inplace=True)
-    df.rename(columns={'index': 'num'}, inplace=True)
-    merged_df = df.merge(total_df[['num', 'intent']], on='num', how='left')
-    merged_df.drop('num', axis=1, inplace=True)
-    df.drop('num', axis=1, inplace=True)
-
-    del temp_df, df3, df4, df5, df6, df7, total_df, temp_df1
-
-    return merged_df
 
 
 def CountMeanTime(filtered_df):
@@ -399,46 +244,18 @@ def GetMonths(start_month, start_year, finish_month, finish_year):
 
 
 def load_projects():
-    df = pd.read_sql("""select * from projects_test""", con=engine)
+    df = pd.read_sql("""select * from projects""", con=engine)
     return df
 
 
-def load_data_site():
-    df = pd.read_excel(r'passport/assets/site.xlsx', skiprows=6)
-    df['Страница входа, ур. 4'] = df['Страница входа, ур. 4'].fillna('')
-    df2 = df[df['Страница входа, ур. 4'].str.contains('molodezhnyy-sovet')][['Страница входа, ур. 4', 'Визиты',
-                                                                             'Посетители', 'Просмотры',
-                                                                             'Доля новых посетителей']]
-    df2 = pd.DataFrame(df2.groupby(['Страница входа, ур. 4'], as_index=False)[['Визиты', 'Посетители', 'Просмотры',
-                                                                               'Доля новых посетителей']].sum())
-    df2 = df2.rename(columns={'Страница входа, ур. 4': 'Страница входа, ур. 2'})
-    df = pd.DataFrame(df.groupby(['Страница входа, ур. 2'], as_index=False)[
-                          ['Визиты', 'Посетители', 'Просмотры', 'Доля новых посетителей']].sum())
-    df.loc[13, 'Страница входа, ур. 2'] = 'https://mbufk.roskazna.gov.ru/'
-    df = df.append(df2).reset_index()
-    df.drop('index', axis=1, inplace=True)
-    df.loc[8, ['Визиты', 'Посетители', 'Просмотры', 'Доля новых посетителей']] = \
-        df.loc[8, ['Визиты', 'Посетители', 'Просмотры', 'Доля новых посетителей']] - \
-        df.loc[14, ['Визиты', 'Посетители', 'Просмотры', 'Доля новых посетителей']]
-
-    df2 = pd.read_excel(r'passport/assets/site.xlsx', sheet_name='перевод', header=None)
-    df['Название'] = ''
-    for num in range(len(df2)):
-        mask = df['Страница входа, ур. 2'].isin(df2.iloc[num])
-        df.loc[mask, 'Название'] = df2.iloc[num][1]
-    df3 = df[(df['Название'] == 'О Межрегиональном бухгалтерском УФК') | (df['Название'] == 'Новости') |
-             (df['Название'] == 'Документы') | (df['Название'] == 'Электронный бюджет') |
-             (df['Название'] == 'Иная деятельность') | (df['Название'] == 'Прием обращений')]
-    return df3
-
-
-def load_data_eb():
-    df = pd.read_excel(r'passport/assets/site.xlsx', skiprows=6)
-    df = df[df['Страница входа, ур. 2'] == 'https://mbufk.roskazna.gov.ru/elektronnyy-byudzhet/']
-    df_eb = df.groupby('Страница входа, ур. 3', as_index=False)['Глубина просмотра'].sum()
-    df4 = pd.read_excel(r'passport/assets/site.xlsx', sheet_name='перевод', skiprows=15, header=None)
-    df_eb['site_page'] = ''
-    for num in range(len(df4)):
-        mask = df_eb['Страница входа, ур. 3'].isin(df4.iloc[num])
-        df_eb.loc[mask, 'site_page'] = df4.iloc[num][1]
-    return df_eb
+def set_differences(diff):
+    if diff > 0:
+        style_t = {'font-size': '2em', 'color': 'green'}
+        diff_t = '+ ' + str(diff)
+    elif diff == 0:
+        style_t = {'font-size': '2em'}
+        diff_t = str(diff)
+    else:
+        style_t = {'font-size': '2em', 'color': 'red'}
+        diff_t = str(diff)
+    return [style_t, diff_t]

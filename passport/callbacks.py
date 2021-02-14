@@ -1,9 +1,9 @@
 from dash.dependencies import Input, Output
-import plotly.graph_objects as go
 import datetime as dt
 import passport.load_data as ld
 import passport.site_info as si
 import passport.log_writer as lw
+import passport.figures as pf
 from passport.layouts import etsp_df, sue_df, osp_df, inf_systems_data, sue_incidents_df
 
 
@@ -29,22 +29,7 @@ def register_callbacks(app):
         Output("inf_systems", "figure"),
         [Input("leg_show", "on")])
     def modify_legend(on):
-        fig_inf_systems = go.Figure()
-        for i in range(len(inf_systems_data)):
-            fig_inf_systems.add_trace(go.Bar(y=inf_systems_data.columns,
-                                             x=inf_systems_data.iloc[i],
-                                             name=inf_systems_data.index[i],
-                                             orientation='h',
-                                             text=inf_systems_data.iloc[i],
-                                             textposition='inside'))
-            fig_inf_systems.update_layout(barmode='stack',
-                                          height=1000,
-                                          legend_xanchor='right',
-                                          paper_bgcolor='#ebecf1',
-                                          plot_bgcolor='#ebecf1',
-                                          showlegend=on)
-            fig_inf_systems.update_yaxes(tickmode="linear")
-
+        fig_inf_systems = pf.fig_inf_systems(inf_systems_data, on)
         return fig_inf_systems
 
     @app.callback(
@@ -67,6 +52,8 @@ def register_callbacks(app):
         Output('site_stat', 'data'),
         Output('sue_avaria', 'tooltip_data'),
         Output('site_top_fig', 'figure'),
+        Output('site_line_graph', 'figure'),
+        Output('el_budget_graph', 'figure'),
         [Input('period_choice', 'start_date'),
          Input('period_choice', 'end_date'),
          Input('month_choice', 'value'),
@@ -94,8 +81,13 @@ def register_callbacks(app):
             osp_filtered_df = osp_df[osp_df['month_open'] == int(choosen_month)]
             sue_incidents_filtered_df = sue_incidents_df[sue_incidents_df['month_open'] == int(choosen_month)]
 
-            start_date_metrika = ld.GetMonthPeriod(ld.current_year, choosen_month)[0]
-            end_date_metrika = ld.GetMonthPeriod(ld.current_year, choosen_month)[1]
+            if choosen_month > ld.current_month:
+                year_metrika = ld.current_year - 1
+            else:
+                year_metrika = ld.current_year
+
+            start_date_metrika = ld.GetMonthPeriod(year_metrika, choosen_month)[0]
+            end_date_metrika = ld.GetMonthPeriod(year_metrika, choosen_month)[1]
 
             filtered_metrika_df = si.get_site_info(start_date_metrika, end_date_metrika)
             filtered_site_visits_graph_df = si.get_data_visits_graph(filtered_metrika_df)
@@ -150,8 +142,13 @@ def register_callbacks(app):
             osp_filtered_df = osp_df[osp_df['week_open'] == int(choosen_week)]
             sue_incidents_filtered_df = sue_incidents_df[sue_incidents_df['week_open'] == int(choosen_week)]
 
-            start_date_metrika = ld.GetPeriod(ld.current_year, choosen_week, 's')[0]
-            end_date_metrika = ld.GetPeriod(ld.current_year, choosen_week, 's')[1]
+            if choosen_week > ld.current_week:
+                year_metrika = ld.current_year - 1
+            else:
+                year_metrika = ld.current_year
+
+            start_date_metrika = ld.GetPeriod(year_metrika, choosen_week, 's')[0]
+            end_date_metrika = ld.GetPeriod(year_metrika, choosen_week, 's')[1]
 
             filtered_metrika_df = si.get_site_info(start_date_metrika, end_date_metrika)
             filtered_site_visits_graph_df = si.get_data_visits_graph(filtered_metrika_df)
@@ -177,84 +174,39 @@ def register_callbacks(app):
         site_stat_data = [{'Визиты': visits, 'Посетители': users, 'Просмотры': pageviews, 'Отказы': bounceRate,
                            'Глубина просмотра': pageDepth, 'Время на сайте': avgVisitDurSec}]
 
-        fig_support = go.Figure(go.Bar(y=[etsp_count_tasks, sue_count_tasks, osp_count_tasks],
-                                       x=['ЕЦП', 'СУЭ', 'ОСП'],
-                                       base=0,
-                                       marker=dict(color=['#a92b2b', '#37a17c', '#a2d5f2']),
-                                       text=[etsp_count_tasks, sue_count_tasks, osp_count_tasks],
-                                       textposition='auto'))
-        fig_support.update_layout(autosize=True,
-                                  legend=dict(
-                                      orientation="h",
-                                      yanchor="bottom",
-                                      y=0.2,
-                                      xanchor="right",
-                                      x=0.5),
-                                  paper_bgcolor='#ebecf1',
-                                  plot_bgcolor='#ebecf1'
-                                  )
-        fig_support.update_xaxes(ticks="inside",
-                                 tickson="boundaries")
+        budget_graph_df = si.get_el_budget_data(filtered_metrika_df, si.NamesElBudgetPages.names_el_budget_section_dict)
 
-        # -----------------------------------------------------------------------------
+        # --------------------------------------------FIGURES----------------------------------------------------------
+        fig_support = pf.plot_figure_support(etsp_count_tasks, sue_count_tasks, osp_count_tasks)
 
-        colors_site_top = ['#003b32', '#40817a', '#afbaa3', '#d0d0b8', '#037c87', '#7cbdc9']
+        site_line_graph = pf.plot_site_line_graph(filtered_metrika_df)
 
-        fig_site_top = go.Figure([go.Bar(x=filtered_site_visits_graph_df['visits'],
-                                         y=filtered_site_visits_graph_df['level2'],
-                                         orientation='h',
-                                         marker_color=colors_site_top,
-                                         text=filtered_site_visits_graph_df['visits'])])
-        fig_site_top.update_traces(textposition='auto')
-        fig_site_top.update_layout(title_text="Визиты", paper_bgcolor='#ebecf1',
-                                   plot_bgcolor='#ebecf1')
+        fig_site_top = pf.plot_fig_site_top(filtered_site_visits_graph_df)
 
+        support_pie_figure = pf.plot_support_pie_figure(etsp_filtered_df, sue_filtered_df, osp_filtered_df)
+
+        el_budget_graph = pf.plot_el_budget_graph(budget_graph_df, si.NamesElBudgetPages.names_el_budget_section_dict)
+
+        # -----------------------------------DIFF-TASKS-AND-USERS------------------------------------------------------
         total_curr_tasks = etsp_count_tasks + sue_count_tasks + osp_count_tasks
         total_prev_tasks = etsp_prev_count_tasks + sue_prev_count_tasks + osp_prev_count_tasks
-        diff_tasks = total_curr_tasks - total_prev_tasks
+        tasks_diff = total_curr_tasks - total_prev_tasks
 
-        if diff_tasks > 0:
-            style_tasks = {'font-size': '2em', 'color': 'green'}
-            diff_tasks = '+ ' + str(diff_tasks)
-        elif diff_tasks == 0:
-            style_tasks = {'font-size': '2em'}
-            diff_tasks = str(diff_tasks)
-        else:
-            style_tasks = {'font-size': '2em', 'color': 'red'}
-            diff_tasks = str(diff_tasks)
-
+        diff_tasks = ld.set_differences(tasks_diff)[1]
+        style_tasks = ld.set_differences(tasks_diff)[0]
         total_tasks = ''.join([str(total_curr_tasks), ' ( ', diff_tasks, ' )'])
 
         total_curr_users = len(etsp_filtered_df['user'].unique()) + len(sue_filtered_df['user'].unique()) + len(
             osp_filtered_df['user'].unique())
         total_prev_users = len(etsp_prev_filt_df['user'].unique()) + len(sue_prev_filt_df['user'].unique()) + len(
             osp_prev_filt_df['user'].unique())
-        diff_users = total_curr_users - total_prev_users
+        users_diff = total_curr_users - total_prev_users
 
-        if diff_users > 0:
-            style_users = {'font-size': '2em', 'color': 'green'}
-            diff_users = '+ ' + str(diff_users)
-        elif diff_users == 0:
-            style_users = {'font-size': '2em'}
-            diff_users = str(diff_users)
-        else:
-            style_users = {'font-size': '2em', 'color': 'red'}
-            diff_users = str(diff_users)
-
+        diff_users = ld.set_differences(users_diff)[1]
+        style_users = ld.set_differences(users_diff)[0]
         total_users = ''.join([str(total_curr_users), ' ( ', diff_users, ' )'])
 
-        labels_figure_support = ["ЕЦП", "СУЭ", "ОСП"]
-        values_figure_support = [etsp_filtered_df['count_task'].sum(), sue_filtered_df['count_task'].sum(),
-                                 osp_filtered_df['count_task'].sum()]
-        colors = ['#a92b2b', '#37a17c', '#a2d5f2']
-
-        fig = go.Figure(go.Pie(labels=labels_figure_support, values=values_figure_support, marker_colors=colors))
-        fig.update_traces(hoverinfo="label+percent+name")
-
-        fig.update_layout(paper_bgcolor='#ebecf1', showlegend=True)
-
         etsp_top_user_filtered_df = ld.TopUser(etsp_filtered_df)
-
         sue_top_user_filtered_df = ld.TopUser(sue_filtered_df)
 
         if len(sue_incidents_filtered_df) > 0:
@@ -268,7 +220,7 @@ def register_callbacks(app):
             tooltip_data = sue_incidents_filtered_df.to_dict('records')
 
         return (period_choice, month_choice, week_choice, fig_support, total_tasks, style_tasks, total_users,
-                style_users, etsp_avg_time, sue_avg_time, osp_avg_time, fig,
-                sue_incidents_filtered_df.to_dict('records'),
-                style_data, etsp_top_user_filtered_df.to_dict('records'), sue_top_user_filtered_df.to_dict('records'),
-                site_stat_data, tooltip_data, fig_site_top)
+                style_users, etsp_avg_time, sue_avg_time, osp_avg_time, support_pie_figure,
+                sue_incidents_filtered_df.to_dict('records'), style_data, etsp_top_user_filtered_df.to_dict('records'),
+                sue_top_user_filtered_df.to_dict('records'), site_stat_data, tooltip_data, fig_site_top,
+                site_line_graph, el_budget_graph)

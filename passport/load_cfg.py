@@ -11,8 +11,3 @@ db_name = cfg_parser['connect']['db']
 db_host = cfg_parser['connect']['host']
 db_port = cfg_parser['connect']['port']
 db_dialect = cfg_parser['connect']['dialect']
-#
-# schema_etsp = cfg_parser['schemas']['etsp_support']
-# schema_sue = cfg_parser['schemas']['sue_support']
-# schema_osp = cfg_parser['schemas']['osp_support']
-# schema_employees = cfg_parser['schemas']['employees']

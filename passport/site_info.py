@@ -4,6 +4,17 @@ import passport.load_cfg as cfg
 import passport.log_writer as lw
 
 
+class NamesElBudgetPages:
+    names_el_budget_section_dict = {'podklyuchenie-k-sisteme': 'Подключение к системе',
+                                    'podsistema-ucheta-i-otchetnosti': 'Подсистема учета и отчетности',
+                                    'servis-upravleniya-komandirovaniem': 'Сервис управления командированием',
+                                    'podsistema-upravleniya-oplatoy-truda': 'Подсистема управления оплатой труда',
+                                    'tekhnicheskaya-podderzhka-gis-elektronnogo-byudzheta': 'Техническая поддержка ГИИС'
+                                                                                            '"Электронный бюджет"',
+                                    'podsistema-ucheta-nefinansovykh-aktivov': 'Подсистема управления нефинансовыми '
+                                                                               'активами'}
+
+
 def get_site_info(start_date, end_date):
     headers = {'Authorization': 'OAuth ' + cfg.token}
     sources_sites = {
@@ -22,7 +33,7 @@ def get_site_info(start_date, end_date):
     lw.log_writer(f"server response code {response.status_code}")
 
     metrika_data = response.json()
-    # lw.log_writer(f"Data load successfully, total row loaded: {metrika_data['total_rows']}")
+    lw.log_writer(f"Data load successfully, total row loaded: {metrika_data['total_rows']}")
 
     if response.status_code != 200 or metrika_data['total_rows'] == 0:
         metrika_df = pd.DataFrame(
@@ -83,5 +94,15 @@ def get_data_visits_graph(metrika_df):
                      'Прием обращений']
     mask = metrika_df['level2'].isin(site_sections)
     metrika_df = metrika_df.loc[mask].sort_values('visits', ascending=True)
+
+    return metrika_df
+
+
+def get_el_budget_data(metrika_df, names_dict):
+    metrika_df['level3'] = metrika_df['level3'].fillna('')
+    for search_str, name in names_dict.items():
+        mask = metrika_df[metrika_df['level3'].str.contains(search_str)].index
+        metrika_df.loc[mask, 'level3'] = name
+    metrika_df = metrika_df[metrika_df['level3'].isin(names_dict.values())]
 
     return metrika_df
