@@ -108,7 +108,7 @@ def plot_el_budget_graph(df, names_el_budget_section_dict):
     for num in range(len(df.groupby(['level3'])[['pageDepth']].mean().pageDepth)):
         fig.add_trace(go.Bar(
             name=list(names_el_budget_section_dict.values())[num],
-            x=['-'],
+            x=[''],
             y=[round(df.groupby(['level3'])[['pageDepth']].mean().pageDepth[num], 1)],
             marker=dict(color=colors[num]),
             text=[round(df.groupby(['level3'])[['pageDepth']].mean().pageDepth[num], 1)],
@@ -126,7 +126,7 @@ def plot_el_budget_graph_mean_time(df, names_el_budget_section_dict):
     for num in range(len(df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds)):
         fig.add_trace(go.Bar(
             name=list(names_el_budget_section_dict.values())[num],
-            x=['-'],
+            x=[''],
             y=[round(df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds[num] // 60 + (
                     df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds[num] % 60 / 100),
                      2)],
