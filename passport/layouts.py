@@ -6,27 +6,27 @@ import dash_table
 
 import dash_daq as daq
 import passport.load_data as ld
-import passport.site_info as si
+# import passport.site_info as si
 
-etsp_df = ld.LoadEtspData()
-etsp_top_user_df = ld.TopUser(etsp_df)
+etsp_df = ld.load_etsp_data()
+etsp_top_user_df = ld.top_user(etsp_df)
 
-sue_df = ld.LoadSueData()
-sue_top_user_df = ld.TopUser(sue_df)
+sue_df = ld.load_sue_data()
+sue_top_user_df = ld.top_user(sue_df)
 
-osp_df = ld.LoadOspData()
-inf_systems_data = ld.LoadInfSystemsData()
+osp_df = ld.load_osp_data()
+inf_systems_data = ld.load_inf_systems_data()
 
-sue_incidents_df = ld.LoadIncident(sue_df)
+sue_incidents_df = ld.load_incident(sue_df)
 
-periods = ld.GetTimePeriods(etsp_df, sue_df, osp_df)
+periods = ld.get_time_periods(etsp_df, sue_df, osp_df)
 
 start_week, start_month, start_year = periods['week'][0], periods['month'][0], periods['year'][0]
 finish_week, finish_month, finish_year = periods['week'][1], periods['month'][1], periods['year'][1]
 
-date1 = ld.GetPeriod(ld.current_year, ld.current_week, 's')[0]
-date2 = ld.GetPeriod(ld.current_year, ld.current_week, 's')[1]
-metrika_df = si.get_site_info(date1, date2)
+# date1 = ld.get_period(ld.current_year, ld.current_week, 's')[0]
+# date2 = ld.get_period(ld.current_year, ld.current_week, 's')[1]
+# metrika_df = si.get_site_info(date1, date2)
 
 tab_selected_style = dict(backgroundColor='#ebecf1', fontWeight='bold')
 
@@ -34,9 +34,9 @@ choice_type = [dict(label='Неделя', value='w'),
                dict(label='Месяц', value='m'),
                dict(label='Произвольный период', value='p')]
 
-d_month = ld.GetMonths(start_month, start_year, finish_month, finish_year)
+d_month = ld.get_months(start_month, start_year, finish_month, finish_year)
 
-d_week = ld.GetWeeks(start_week, start_year, finish_week, finish_year)
+d_week = ld.get_weeks(start_week, start_year, finish_week, finish_year)
 
 tooltips_table_site = [{'Визиты': 'Суммарное количество визитов.', 'Посетители': 'Количество уникальных посетителей.',
                         'Просмотры': 'Число просмотров страниц на сайте за выбранный период.',
@@ -241,7 +241,11 @@ layout = html.Div([
                     html.Div([html.H3('Рейтинг посещаемости разделов сайта', style=dict(padding='20px'))]),
                     html.Div([dcc.Graph(id='site_top_fig')]),
                     html.Div([dcc.Graph(id='site_line_graph')]),
-                    html.Div([dcc.Graph(id='el_budget_graph')]),
+                    html.Div([
+                        html.Div([dcc.Graph(id='el_budget_graph_mean_time')], className='line_block',
+                                 style=dict(width='37%')),
+                        html.Div([dcc.Graph(id='el_budget_graph')], className='line_block', style=dict(width='56%')),
+                    ]),
                 ], selected_style=tab_selected_style),  # tab site
                 dcc.Tab(label='Проекты', value='pr', children=[
                     html.Br(),
@@ -251,7 +255,7 @@ layout = html.Div([
                                      value='1',
                                      style=dict(width='99%', margin='0 auto')),
                         html.Br(),
-                        html.H4(id='project_name'),
+                        html.H4(id='project_name', style=dict(width='99%', margin='0 auto')),
                         html.Br(),
                         html.Div([
                             html.H5('Исполнители:  '),
@@ -272,9 +276,7 @@ layout = html.Div([
                                          searchable=False,
                                          disabled=True, style=dict(float='left', width='100%'))
                         ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top', width='13.7%')),
-
                     ]),
-
                     html.Br(),
                     html.Div([
                         html.Div([

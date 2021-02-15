@@ -9,9 +9,9 @@ class NamesElBudgetPages:
                                     'podsistema-ucheta-i-otchetnosti': 'Подсистема учета и отчетности',
                                     'servis-upravleniya-komandirovaniem': 'Сервис управления командированием',
                                     'podsistema-upravleniya-oplatoy-truda': 'Подсистема управления оплатой труда',
-                                    'tekhnicheskaya-podderzhka-gis-elektronnogo-byudzheta': 'Техническая поддержка ГИИС'
+                                    'tekhnicheskaya-podderzhka-gis-elektronnogo-byudzheta': 'Тех. поддержка ГИИС'
                                                                                             '"Электронный бюджет"',
-                                    'podsistema-ucheta-nefinansovykh-aktivov': 'Подсистема управления нефинансовыми '
+                                    'podsistema-ucheta-nefinansovykh-aktivov': 'Подсистема упр. нефинансовыми '
                                                                                'активами'}
 
 

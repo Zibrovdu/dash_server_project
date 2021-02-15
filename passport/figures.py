@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+import datetime as dt
 
 
 def plot_figure_support(etsp_count_tasks, sue_count_tasks, osp_count_tasks):
@@ -102,18 +103,38 @@ def fig_inf_systems(inf_systems_data, on):
 
 
 def plot_el_budget_graph(df, names_el_budget_section_dict):
-    colors = ['#0187ad', '#8abc01', '#cdbf5c', '#61cbd9',  '#607816', '#0a1006']
+    colors = ['#0187ad', '#8abc01', '#cdbf5c', '#61cbd9', '#607816', '#0a1006']
     fig = go.Figure()
     for num in range(len(df.groupby(['level3'])[['pageDepth']].mean().pageDepth)):
         fig.add_trace(go.Bar(
             name=list(names_el_budget_section_dict.values())[num],
-            x=['подразделы'],
+            x=['-'],
             y=[round(df.groupby(['level3'])[['pageDepth']].mean().pageDepth[num], 1)],
             marker=dict(color=colors[num]),
             text=[round(df.groupby(['level3'])[['pageDepth']].mean().pageDepth[num], 1)],
-            textposition='auto'))
-    fig.update_traces(textfont_size=20, textfont_family='Arial Black')
+            textposition='outside'))
+    fig.update_traces(textfont_size=10)
     fig.update_layout(title_text='Глубина просмотра раздела "Электронный бюджет"', paper_bgcolor='#ebecf1',
                       plot_bgcolor='#ebecf1')
+
+    return fig
+
+
+def plot_el_budget_graph_mean_time(df, names_el_budget_section_dict):
+    colors = ['#0187ad', '#8abc01', '#cdbf5c', '#61cbd9', '#607816', '#0a1006']
+    fig = go.Figure()
+    for num in range(len(df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds)):
+        fig.add_trace(go.Bar(
+            name=list(names_el_budget_section_dict.values())[num],
+            x=['-'],
+            y=[round(df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds[num] // 60 + (
+                    df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds[num] % 60 / 100),
+                     2)],
+            marker=dict(color=colors[num]),
+            text=[str(dt.timedelta(seconds=round(
+                df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds[num])))[2:]],
+            textposition='outside'))
+    fig.update_traces(textfont_size=10, showlegend=False)
+    fig.update_layout(title_text='Средняя продолжительность визита', paper_bgcolor='#ebecf1', plot_bgcolor='#ebecf1')
 
     return fig

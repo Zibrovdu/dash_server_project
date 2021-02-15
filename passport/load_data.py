@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import pandas as pd
 from sqlalchemy import create_engine
 import passport.load_cfg as lc
+import passport.log_writer as lw
 
 engine = create_engine(f'{lc.db_dialect}://{lc.db_username}:{lc.db_password}@{lc.db_host}:{lc.db_port}/{lc.db_name}')
 
@@ -17,28 +18,28 @@ end_month = (date.today() - timedelta(days=7)).month
 end_year = (date.today() - timedelta(days=7)).year
 
 
-def LoadEtspData():
+def load_etsp_data():
     df = pd.read_sql('''select * from etsp_data''', con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
 
 
-def LoadSueData():
+def load_sue_data():
     df = pd.read_sql('''select * from sue_data''', con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
 
 
-def LoadOspData():
+def load_osp_data():
     df = pd.read_sql('''select * from osp_data''', con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
 
 
-def TopUser(df):
+def top_user(df):
     top_user_df = df[(df.unit != '19. Отдел сопровождения пользователей') & (df.unit != 'ЦОКР') & (
             df.user != 'Кондрашова Ирина Сергеевна')]
     top_user_df = pd.DataFrame(top_user_df.groupby('user')['count_task'].sum().sort_values(ascending=False).head()
@@ -46,7 +47,7 @@ def TopUser(df):
     return top_user_df
 
 
-def LoadIncident(df):
+def load_incident(df):
     incident_df = df[(df.status == 'Проблема') | (df.status == 'Массовый инцидент')]
     incident_df.columns = ['Дата обращения', 'Тип', 'Номер', 'Описание', 'Плановое время', 'Фактическое время',
                            'Пользователь', 'timedelta', 'Отдел', 'Дата', 'finish_date', 'month_open',
@@ -54,7 +55,7 @@ def LoadIncident(df):
     return incident_df
 
 
-def NoIncidents():
+def no_icidents():
     no_incidents_df = pd.DataFrame({'Дата': '-', 'Тип': 'Аварийных инциндентов нет', 'Номер': '-', 'Описание': '-',
                                     'Плановое время': '-', 'Фактическое время': '-', 'Пользователь': '-',
                                     'timedelta': '-', 'Отдел': '-', 'start_date': '-', 'finish_date': '-',
@@ -64,7 +65,7 @@ def NoIncidents():
     return no_incidents_df
 
 
-def GetTimeData(df):
+def get_time_data(df):
     delta_4h, delta_8h, delta_24h, delta_5d = timedelta(hours=4), timedelta(hours=8), timedelta(hours=24), \
                                               timedelta(days=5)
 
@@ -92,7 +93,7 @@ def GetTimeData(df):
     return df1
 
 
-def GetTimePeriods(etsp_df, sue_df, osp_df):
+def get_time_periods(etsp_df, sue_df, osp_df):
     start_weeks_list = [etsp_df.reg_date.min().week, sue_df.reg_date.min().week, osp_df.reg_date.min().week]
     end_weeks_list = [etsp_df.reg_date.max().week, sue_df.reg_date.max().week, osp_df.reg_date.max().week]
 
@@ -106,7 +107,7 @@ def GetTimePeriods(etsp_df, sue_df, osp_df):
                 year=[min(start_year_list), max(end_year_list)])
 
 
-def CountMeanTime(filtered_df):
+def count_mean_time(filtered_df):
     duration = filtered_df['timedelta'].mean()
     count_tasks = filtered_df['count_task'].sum()
 
@@ -127,17 +128,17 @@ def CountMeanTime(filtered_df):
     return avg_time
 
 
-def LoadInfSystemsData():
+def load_inf_systems_data():
     df = pd.read_excel(r'passport/assets/dostup.xlsx', sheet_name='Лист5', index_col=0)
     df.drop('Номер отдела', axis=1, inplace=True)
 
     return df
 
 
-def GetPeriod(year, week, output_format='n'):
+def get_period(year, week, output_format='n'):
     """
     Синтаксис:
-    GetPeriod(
+    get_period(
             year,
             week,
             output_format='n')
@@ -184,7 +185,7 @@ def GetPeriod(year, week, output_format='n'):
     return period
 
 
-def GetMonthPeriod(year, month_num):
+def get_month_period(year, month_num):
     """
     Функция принимает на вход год и номер месяца. Возвращает списко содержащий первую и последнюю даты месяца
     в виде строки формата 'ГГГГ-ММ-ДД'
@@ -197,7 +198,7 @@ def GetMonthPeriod(year, month_num):
     return [start_date, end_date]
 
 
-def GetWeeks(start_week, start_year, finish_week, finish_year):
+def get_weeks(start_week, start_year, finish_week, finish_year):
     """
     Функция принимает на вход период в виде 4-х параметров (номер недели и год начала, номер недели и год окончания.
     Возвращает список словарей содержащих информацию о номере недели, её периоде, и номере недели для последующей
@@ -205,9 +206,10 @@ def GetWeeks(start_week, start_year, finish_week, finish_year):
     """
     last_week_of_start_year = date(start_year, 12, 31).isocalendar()[1]
 
-    start_period = [{"label": f'Неделя {i} ({GetPeriod(start_year, i)})',
+    start_period = [{"label": f'Неделя {i} ({get_period(start_year, i)})',
                      "value": i} for i in range(start_week, last_week_of_start_year + 1)]
-    end_period = [{"label": f'Неделя {i} ({GetPeriod(finish_year, i)})', "value": i} for i in range(1, finish_week + 1)]
+    end_period = [{"label": f'Неделя {i} ({get_period(finish_year, i)})', "value": i}
+                  for i in range(1, finish_week + 1)]
 
     for item in end_period:
         start_period.append(item)
@@ -216,7 +218,7 @@ def GetWeeks(start_week, start_year, finish_week, finish_year):
     return start_period
 
 
-def GetPeriodMonth(year, month):
+def get_period_month(year, month):
     """
     Функция принимает на вход номер месяца и год. Взоращает строку 'Месяц год'
     """
@@ -227,14 +229,14 @@ def GetPeriodMonth(year, month):
     return period
 
 
-def GetMonths(start_month, start_year, finish_month, finish_year):
+def get_months(start_month, start_year, finish_month, finish_year):
     """
     Функция принимает на вход период в виде 4-х параметров (номер месяца и год начала, номер месяца и год окончания.
     Возвращает список словарей содержащих информацию о месяце, годе и номере месяца для последующей загрузки в
     компонент dcc.Dropdown.
     """
-    start_period = [{"label": f'{GetPeriodMonth(start_year, i)}', "value": i} for i in range(start_month, 13)]
-    end_period = [{"label": f'{GetPeriodMonth(finish_year, i)}', "value": i} for i in range(1, finish_month + 1)]
+    start_period = [{"label": f'{get_period_month(start_year, i)}', "value": i} for i in range(start_month, 13)]
+    end_period = [{"label": f'{get_period_month(finish_year, i)}', "value": i} for i in range(1, finish_month + 1)]
 
     for item in end_period:
         start_period.append(item)
@@ -245,6 +247,7 @@ def GetMonths(start_month, start_year, finish_month, finish_year):
 
 def load_projects():
     df = pd.read_sql("""select * from projects""", con=engine)
+
     return df
 
 
@@ -259,3 +262,93 @@ def set_differences(diff):
         style_t = {'font-size': '2em', 'color': 'red'}
         diff_t = str(diff)
     return [style_t, diff_t]
+
+
+def get_prev_filtered_df(df, start_date_user, choosen_month, choosen_week, choice_type_period):
+    if choice_type_period == 'm':
+        if int(choosen_month) > 1:
+            return df[df['month_open'] == (int(choosen_month) - 1)]
+        else:
+            return df[df['month_open'] == 12]
+
+    elif choice_type_period == 'p':
+        if int(start_date_user[5:7]) > 1:
+            return df[df['month_open'] == (int(start_date_user[5:7]) - 1)]
+        else:
+            return df[df['month_open'] == 12]
+
+    else:
+        if int(choosen_week) > 1:
+            return df[df['week_open'] == (int(choosen_week) - 1)]
+        else:
+            return df[df['week_open'] == 52]
+
+
+def choosen_type(choice_type_period, start_date_user, end_date_user, choosen_month, choosen_week):
+    if choice_type_period == 'm':
+        period_choice = True
+        week_choice = True
+        month_choice = False
+        lw.log_writer(f'User choice "month = {choosen_month}"')
+
+    elif choice_type_period == 'p':
+        period_choice = False
+        week_choice = True
+        month_choice = True
+        lw.log_writer(f'User choice "range period start = {start_date_user}, end = {end_date_user}"')
+
+    else:
+        period_choice = True
+        week_choice = False
+        month_choice = True
+        lw.log_writer(f'User choice "week = {choosen_week} ({get_period(current_year, choosen_week)})"')
+
+    return period_choice, week_choice, month_choice
+
+
+def get_filtered_df(df, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    if choice_type_period == 'm':
+        return df[df['month_open'] == int(choosen_month)]
+
+    elif choice_type_period == 'p':
+        return df[(df['start_date'] >= start_date_user) & (df['start_date'] <= end_date_user)]
+
+    else:
+        return df[df['week_open'] == int(choosen_week)]
+
+
+def get_date_for_metrika_df(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    if choice_type_period == 'm':
+        if choosen_month > current_month:
+            year_metrika = current_year - 1
+        else:
+            year_metrika = current_year
+
+        start_date_metrika = get_month_period(year_metrika, choosen_month)[0]
+        end_date_metrika = get_month_period(year_metrika, choosen_month)[1]
+
+    elif choice_type_period == 'p':
+        start_date_metrika = start_date_user
+        end_date_metrika = end_date_user
+
+    else:
+        if choosen_week > current_week:
+            year_metrika = current_year - 1
+        else:
+            year_metrika = current_year
+
+        start_date_metrika = get_period(year_metrika, choosen_week, 's')[0]
+        end_date_metrika = get_period(year_metrika, choosen_week, 's')[1]
+
+    return start_date_metrika, end_date_metrika
+
+
+def get_filtered_incidents_df(df, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    if choice_type_period == 'm':
+        return df[df['month_open'] == int(choosen_month)]
+
+    elif choice_type_period == 'p':
+        return df[(df['Дата обращения'] >= start_date_user) & (df['Дата обращения'] <= end_date_user)]
+
+    else:
+        return df[df['week_open'] == int(choosen_week)]
