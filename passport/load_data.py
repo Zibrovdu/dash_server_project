@@ -20,6 +20,7 @@ end_year = (date.today() - timedelta(days=7)).year
 
 def load_etsp_data():
     df = pd.read_sql('''select * from etsp_data''', con=engine)
+    # df = pd.read_excel('passport/assets/etsp.xlsx')
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -27,6 +28,7 @@ def load_etsp_data():
 
 def load_sue_data():
     df = pd.read_sql('''select * from sue_data''', con=engine)
+    # df = pd.read_excel('passport/assets/sue.xlsx')
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -34,6 +36,7 @@ def load_sue_data():
 
 def load_osp_data():
     df = pd.read_sql('''select * from osp_data''', con=engine)
+    # df = pd.read_excel('passport/assets/osp.xlsx')
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -192,8 +195,12 @@ def get_month_period(year, month_num):
     """
     num_days = calendar.monthrange(year, month_num)[1]
 
-    start_date = f'{year}-0{month_num}-01'
-    end_date = f'{year}-0{month_num}-{num_days}'
+    if month_num > 9:
+        start_date = f'{year}-{month_num}-01'
+        end_date = f'{year}-{month_num}-{num_days}'
+    else:
+        start_date = f'{year}-0{month_num}-01'
+        end_date = f'{year}-0{month_num}-{num_days}'
 
     return [start_date, end_date]
 
@@ -247,6 +254,7 @@ def get_months(start_month, start_year, finish_month, finish_year):
 
 def load_projects():
     df = pd.read_sql("""select * from projects""", con=engine)
+    # df = pd.read_excel('passport/assets/projects.xlsx')
 
     return df
 

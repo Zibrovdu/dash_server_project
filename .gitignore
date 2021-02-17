@@ -1,0 +1,6 @@
+*.xlsx
+*.xls
+*.rkz
+/__pycache__
+/logs
+*.log
