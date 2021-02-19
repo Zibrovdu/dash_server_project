@@ -258,21 +258,16 @@ layout = html.Div([
                                              data=projects_df.to_dict('records'),
                                              style_as_list_view=True,
                                              cell_selectable=False,
-                                             sort_action="native",
+                                             style_table={'overflowX': 'auto'},
+                                             # sort_action="native",
                                              style_data={
                                                  'whiteSpace': 'normal',
-                                                 'height': 'auto',
-                                                 'lineHeight': '15px'
+                                                 'height': 'auto'
                                              },
-                                             style_cell={'textAlign': 'left', 'padding': '5px'},
+                                             style_cell={'textAlign': 'left'},
                                              style_header={'backgroundColor': 'rgb(230, 230, 230)',
-                                                           'fontWeight': 'bold'},
-                                             style_cell_conditional=[{'if': {'column_id': 'Номер'}, 'width': '10px'},
-                                                                     {'if': {'column_id': 'Процент выполнения'},
-                                                                      'width': '20px'},
-                                                                     {'if': {'column_id': 'Исполнитель'},
-                                                                      'width': '170px'}])
-                    ], style=dict(width='97%', margin='0 auto'))
+                                                           'fontWeight': 'bold'})
+                    ], style=dict(width='98%', margin='0 auto'))
                     # html.Br(),
                     # html.Div([
                     #     dcc.Dropdown(id='projects_name',

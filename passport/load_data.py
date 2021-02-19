@@ -20,7 +20,6 @@ end_year = (date.today() - timedelta(days=7)).year
 
 def load_etsp_data():
     df = pd.read_sql('''select * from etsp_data''', con=engine)
-    # df = pd.read_excel('passport/assets/etsp.xlsx')
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -28,7 +27,6 @@ def load_etsp_data():
 
 def load_sue_data():
     df = pd.read_sql('''select * from sue_data''', con=engine)
-    # df = pd.read_excel('passport/assets/sue.xlsx')
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -36,7 +34,6 @@ def load_sue_data():
 
 def load_osp_data():
     df = pd.read_sql('''select * from osp_data''', con=engine)
-    # df = pd.read_excel('passport/assets/osp.xlsx')
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -44,7 +41,7 @@ def load_osp_data():
 
 def top_user(df):
     top_user_df = df[(df.unit != 'Отдел сопровождения пользователей') & (df.unit != 'ЦОКР') & (
-            df.user != 'Кондрашова Ирина Сергеевна')]
+            df.user != 'Кондрашова Ирина Сергеевна') & (df.unit != '19. Отдел сопровождения пользователей')]
     top_user_df = pd.DataFrame(top_user_df.groupby('user')['count_task'].sum().sort_values(ascending=False).head()
                                .reset_index()).rename(columns={'user': 'Пользователь', 'count_task': 'Обращения'})
     return top_user_df
@@ -253,8 +250,7 @@ def get_months(start_month, start_year, finish_month, finish_year):
 
 
 def load_projects():
-    # df = pd.read_sql("""select * from projects""", con=engine)
-    df = pd.read_excel('passport/assets/projects.xlsx')
+    df = pd.read_sql("""select * from projects""", con=engine)
 
     return df
 
