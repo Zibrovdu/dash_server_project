@@ -43,7 +43,7 @@ def load_osp_data():
 
 
 def top_user(df):
-    top_user_df = df[(df.unit != '19. Отдел сопровождения пользователей') & (df.unit != 'ЦОКР') & (
+    top_user_df = df[(df.unit != 'Отдел сопровождения пользователей') & (df.unit != 'ЦОКР') & (
             df.user != 'Кондрашова Ирина Сергеевна')]
     top_user_df = pd.DataFrame(top_user_df.groupby('user')['count_task'].sum().sort_values(ascending=False).head()
                                .reset_index()).rename(columns={'user': 'Пользователь', 'count_task': 'Обращения'})
@@ -253,8 +253,8 @@ def get_months(start_month, start_year, finish_month, finish_year):
 
 
 def load_projects():
-    df = pd.read_sql("""select * from projects""", con=engine)
-    # df = pd.read_excel('passport/assets/projects.xlsx')
+    # df = pd.read_sql("""select * from projects""", con=engine)
+    df = pd.read_excel('passport/assets/projects.xlsx')
 
     return df
 

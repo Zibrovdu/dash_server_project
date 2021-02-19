@@ -6,6 +6,7 @@ import dash_table
 
 import dash_daq as daq
 import passport.load_data as ld
+
 # import passport.site_info as si
 
 etsp_df = ld.load_etsp_data()
@@ -46,9 +47,11 @@ tooltips_table_site = [{'Визиты': 'Суммарное количество
                         'Время на сайте': 'Средняя продолжительность визита в минутах и секундах.'}]
 
 projects_df = ld.load_projects()
-projects_names = [{"label": i[0], "value": i[1]} for i in projects_df[['name', 'id']].values]
-projects_statuses = [{"label": i, "value": i} for i in projects_df['status'].unique()]
-projects_persents = [{"label": ''.join([str(i * 10), '%']), "value": i / 10} for i in range(1, 11, 1)]
+projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Статус']
+projects_df['Процент выполнения'] = projects_df['Процент выполнения'].apply(lambda x: ''.join([str(x * 100), '%']))
+# projects_names = [{"label": i[0], "value": i[1]} for i in projects_df[['name', 'id']].values]
+# projects_statuses = [{"label": i, "value": i} for i in projects_df['status'].unique()]
+# projects_persents = [{"label": ''.join([str(i * 10), '%']), "value": i / 10} for i in range(1, 11, 1)]
 
 layout = html.Div([
     html.Div([
@@ -250,57 +253,79 @@ layout = html.Div([
                 dcc.Tab(label='Проекты', value='pr', children=[
                     html.Br(),
                     html.Div([
-                        dcc.Dropdown(id='projects_name',
-                                     options=projects_names,
-                                     value='1',
-                                     style=dict(width='99%', margin='0 auto')),
-                        html.Br(),
-                        html.H4(id='project_name', style=dict(width='99%', margin='0 auto')),
-                        html.Br(),
-                        html.Div([
-                            html.H5('Исполнители:  '),
-                        ], style=dict(float='left', width='14.6%')),
-                        html.Div([
-                            html.H6(id='executor', style=dict()),
-                        ], style=dict(float='left', width='45%')),
-                        html.Div([
-                            html.H5('Процент выполнения:  ')
-                        ], style=dict(float='left', width='23.5%')),
-                        html.Div([
-                        ], style=dict(float='left', width='3%')),
-                        html.Div([
-                            # html.H5(id='persent_dd', style=dict(color='green')),
-                            dcc.Dropdown(id='persent_dd',
-                                         options=projects_persents,
-                                         clearable=False,
-                                         searchable=False,
-                                         disabled=True, style=dict(float='left', width='100%'))
-                        ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top', width='13.7%')),
-                    ]),
-                    html.Br(),
-                    html.Div([
-                        html.Div([
-                            html.H5('Статус проекта:  ', style=dict(width='250px'))], style=dict(display='inline-block',
-                                                                                                 marginRight='20px',
-                                                                                                 verticalAlign='top')),
-                        html.Div([
-                            dcc.Dropdown(id='status',
-                                         options=projects_statuses,
-                                         clearable=False,
-                                         searchable=False,
-                                         multi=False,
-                                         disabled=True,
-                                         style=dict(width='320px'))
-                        ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top')),
-                    ], style=dict(float='right')),
-                    html.Br(),
-                    html.Div([
-                        html.H5('Описание проекта:'),
-                    ], style=dict(width='200px')),
-                    html.Div([
-                        dcc.Textarea(id='project_decsr', style={'width': '100%', 'height': 300})
-                    ]),
-                    html.Div(style=dict(backgroundColor='#ebecf1', height='300', border='1px solid black'))
+                        dash_table.DataTable(id='project_table',
+                                             columns=[{"name": i, "id": i} for i in projects_df.columns],
+                                             data=projects_df.to_dict('records'),
+                                             style_as_list_view=True,
+                                             cell_selectable=False,
+                                             sort_action="native",
+                                             style_data={
+                                                 'whiteSpace': 'normal',
+                                                 'height': 'auto',
+                                                 'lineHeight': '15px'
+                                             },
+                                             style_cell={'textAlign': 'left', 'padding': '5px'},
+                                             style_header={'backgroundColor': 'rgb(230, 230, 230)',
+                                                           'fontWeight': 'bold'},
+                                             style_cell_conditional=[{'if': {'column_id': 'Номер'}, 'width': '10px'},
+                                                                     {'if': {'column_id': 'Процент выполнения'},
+                                                                      'width': '20px'},
+                                                                     {'if': {'column_id': 'Исполнитель'},
+                                                                      'width': '170px'}])
+                    ], style=dict(width='97%', margin='0 auto'))
+                    # html.Br(),
+                    # html.Div([
+                    #     dcc.Dropdown(id='projects_name',
+                    #                  options=projects_names,
+                    #                  value='1',
+                    #                  style=dict(width='99%', margin='0 auto')),
+                    #     html.Br(),
+                    #     html.H4(id='project_name', style=dict(width='99%', margin='0 auto')),
+                    #     html.Br(),
+                    #     html.Div([
+                    #         html.H5('Исполнители:  '),
+                    #     ], style=dict(float='left', width='14.6%')),
+                    #     html.Div([
+                    #         html.H6(id='executor', style=dict()),
+                    #     ], style=dict(float='left', width='45%')),
+                    #     html.Div([
+                    #         html.H5('Процент выполнения:  ')
+                    #     ], style=dict(float='left', width='23.5%')),
+                    #     html.Div([
+                    #     ], style=dict(float='left', width='3%')),
+                    #     html.Div([
+                    #         # html.H5(id='persent_dd', style=dict(color='green')),
+                    #         dcc.Dropdown(id='persent_dd',
+                    #                      options=projects_persents,
+                    #                      clearable=False,
+                    #                      searchable=False,
+                    #                      disabled=True, style=dict(float='left', width='100%'))
+                    #     ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top', width='13.7%')),
+                    # ]),
+                    # html.Br(),
+                    # html.Div([
+                    #     html.Div([
+                    #         html.H5('Статус проекта:  ', style=dict(width='250px'))], style=dict(display='inline-block',
+                    #                                                                              marginRight='20px',
+                    #                                                                              verticalAlign='top')),
+                    #     html.Div([
+                    #         dcc.Dropdown(id='status',
+                    #                      options=projects_statuses,
+                    #                      clearable=False,
+                    #                      searchable=False,
+                    #                      multi=False,
+                    #                      disabled=True,
+                    #                      style=dict(width='320px'))
+                    #     ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top')),
+                    # ], style=dict(float='right')),
+                    # html.Br(),
+                    # html.Div([
+                    #     html.H5('Описание проекта:'),
+                    # ], style=dict(width='200px')),
+                    # html.Div([
+                    #     dcc.Textarea(id='project_decsr', style={'width': '100%', 'height': 300})
+                    # ]),
+                    # html.Div(style=dict(backgroundColor='#ebecf1', height='300', border='1px solid black'))
                 ], selected_style=tab_selected_style),  # tab projects
             ], colors=dict(border='#ebecf1', primary='#222780', background='#33ccff')),  # main tabs end
             html.Div(id='tabs_content')
