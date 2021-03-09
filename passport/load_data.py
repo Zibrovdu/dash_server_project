@@ -252,16 +252,16 @@ def get_months(start_month, start_year, finish_month, finish_year):
 def load_projects(projects_status='in_progress'):
     if projects_status == 'in_progress':
         return pd.read_sql("""
-        select name, executor, persent, stage, finish_date from projects_new where persent < 100
+        select id, name, executor, persent, stage, finish_date from projects_new where persent < 100
         """,
                            con=engine)
     elif projects_status == 'complete':
         return pd.read_sql("""
-        select name, executor, persent, stage, finish_date from projects_new where persent = 100
+        select id, name, executor, persent, stage, finish_date from projects_new where persent = 100
         """,
                            con=engine)
     else:
-        return pd.DataFrame(columns=['name', 'executor', 'persent', 'stage', 'finish_date'])
+        return pd.DataFrame(columns=['id', 'name', 'executor', 'persent', 'stage', 'finish_date'])
 
 
 def set_differences(diff):

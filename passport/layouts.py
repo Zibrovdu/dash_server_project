@@ -3,7 +3,7 @@ import dash_html_components as html
 import calendar
 import datetime as dt
 import dash_table
-
+import pandas as pd
 import dash_daq as daq
 import passport.load_data as ld
 
@@ -43,11 +43,15 @@ tooltips_table_site = [{'Визиты': 'Суммарное количество
                         'Время на сайте': 'Средняя продолжительность визита в минутах и секундах.'}]
 
 projects_df = ld.load_projects()
-projects_df.columns = ['Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
+projects_df['id'] = pd.Series([x for x in range(1, len(projects_df)+1)])
+projects_df = projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
+projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
 # projects_df['Процент выполнения'] = projects_df['Процент выполнения'].apply(lambda x: ''.join([str(x * 100), '%']))
 print(len(projects_df))
 complete_projects_df = ld.load_projects('complete')
-complete_projects_df.columns = ['Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
+complete_projects_df['id'] = pd.Series([x for x in range(1, len(complete_projects_df)+1)])
+complete_projects_df = complete_projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
+complete_projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
 # complete_projects_df['Процент выполнения'] = complete_projects_df['Процент выполнения'].apply(
 #     lambda x: ''.join([str(x * 100), '%']))
 print(len(complete_projects_df))
