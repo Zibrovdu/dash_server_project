@@ -115,7 +115,7 @@ def plot_el_budget_graph(df, names_el_budget_section_dict):
             textposition='outside'))
     fig.update_traces(textfont_size=10)
     fig.update_layout(title_text='Глубина просмотра раздела "Электронный бюджет"', paper_bgcolor='#ebecf1',
-                      plot_bgcolor='#ebecf1')
+                      plot_bgcolor='#ebecf1', title_xref='paper')
 
     return fig
 
@@ -135,6 +135,7 @@ def plot_el_budget_graph_mean_time(df, names_el_budget_section_dict):
                 df.groupby(['level3'])[['avgVisitDurationSeconds']].mean().avgVisitDurationSeconds[num])))[2:]],
             textposition='outside'))
     fig.update_traces(textfont_size=10, showlegend=False)
-    fig.update_layout(title_text='Средняя продолжительность визита', paper_bgcolor='#ebecf1', plot_bgcolor='#ebecf1')
+    fig.update_layout(title_text='Средняя продолжительность визита', paper_bgcolor='#ebecf1', plot_bgcolor='#ebecf1',
+                      title_xref='paper')
 
     return fig

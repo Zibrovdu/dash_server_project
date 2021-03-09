@@ -7,7 +7,6 @@ import dash_table
 import dash_daq as daq
 import passport.load_data as ld
 
-# import passport.site_info as si
 
 etsp_df = ld.load_etsp_data()
 etsp_top_user_df = ld.top_user(etsp_df)
@@ -25,10 +24,6 @@ periods = ld.get_time_periods(etsp_df, sue_df, osp_df)
 start_week, start_month, start_year = periods['week'][0], periods['month'][0], periods['year'][0]
 finish_week, finish_month, finish_year = periods['week'][1], periods['month'][1], periods['year'][1]
 
-# date1 = ld.get_period(ld.current_year, ld.current_week, 's')[0]
-# date2 = ld.get_period(ld.current_year, ld.current_week, 's')[1]
-# metrika_df = si.get_site_info(date1, date2)
-
 tab_selected_style = dict(backgroundColor='#ebecf1', fontWeight='bold')
 
 choice_type = [dict(label='Неделя', value='w'),
@@ -38,6 +33,7 @@ choice_type = [dict(label='Неделя', value='w'),
 d_month = ld.get_months(start_month, start_year, finish_month, finish_year)
 
 d_week = ld.get_weeks(start_week, start_year, finish_week, finish_year)
+print(d_week)
 
 tooltips_table_site = [{'Визиты': 'Суммарное количество визитов.', 'Посетители': 'Количество уникальных посетителей.',
                         'Просмотры': 'Число просмотров страниц на сайте за выбранный период.',
@@ -47,12 +43,14 @@ tooltips_table_site = [{'Визиты': 'Суммарное количество
                         'Время на сайте': 'Средняя продолжительность визита в минутах и секундах.'}]
 
 projects_df = ld.load_projects()
-projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Статус']
-projects_df['Процент выполнения'] = projects_df['Процент выполнения'].apply(lambda x: ''.join([str(x * 100), '%']))
-# projects_names = [{"label": i[0], "value": i[1]} for i in projects_df[['name', 'id']].values]
-# projects_statuses = [{"label": i, "value": i} for i in projects_df['status'].unique()]
-# projects_persents = [{"label": ''.join([str(i * 10), '%']), "value": i / 10} for i in range(1, 11, 1)]
-
+projects_df.columns = ['Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
+# projects_df['Процент выполнения'] = projects_df['Процент выполнения'].apply(lambda x: ''.join([str(x * 100), '%']))
+print(len(projects_df))
+complete_projects_df = ld.load_projects('complete')
+complete_projects_df.columns = ['Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
+# complete_projects_df['Процент выполнения'] = complete_projects_df['Процент выполнения'].apply(
+#     lambda x: ''.join([str(x * 100), '%']))
+print(len(complete_projects_df))
 layout = html.Div([
     html.Div([
         html.H2('Отдел сопровождения пользователей'),
@@ -114,8 +112,8 @@ layout = html.Div([
                                 html.Td('Среднее время решения', colSpan=3)
                             ]),
                             html.Tr([
-                                html.Td(id='tasks', rowSpan=2, style={'fontSize': '2em'}),
-                                html.Td(id='users', rowSpan=2, style={'font-size': '2.2em'}),
+                                html.Td(id='tasks', rowSpan=2, style=dict(fontSize='2em')),
+                                html.Td(id='users', rowSpan=2, style=dict(fontSize='2.2em')),
                                 html.Td('ЕЦП'),
                                 html.Td('СУЭ'),
                                 html.Td('ОСП')
@@ -133,12 +131,11 @@ layout = html.Div([
                         html.Div([html.Label('Аварийные инциденты'),
                                   dash_table.DataTable(id='sue_avaria',
                                                        columns=[{"name": i, "id": i} for i in sue_incidents_df.columns
-                                                                if
-                                                                i == 'Тип' or i == 'Номер' or
-                                                                i == 'Описание' or i == 'Дата'],
+                                                                if i == 'Тип' or i == 'Номер' or i == 'Описание'
+                                                                or i == 'Дата'],
                                                        sort_action="native",
-                                                       style_table={'height': '150px', 'overflowY': 'auto'},
-                                                       fixed_rows={'headers': True},
+                                                       style_table=dict(height='150px', overflowY='auto'),
+                                                       fixed_rows=dict(headers=True),
                                                        style_as_list_view=True,
                                                        cell_selectable=False,
                                                        style_data=dict(width='20%'),
@@ -166,8 +163,7 @@ layout = html.Div([
                         html.Div([dcc.Graph(id='support_figure')], className='line_block', style=dict(width='46%')),
                     ]),
                     html.Br(),
-                    html.Div([html.H3('ТОП-5 пользователей')],
-                             style={'color': '#222780', 'font-type': 'bold'}),
+                    html.Div([html.H3('ТОП-5 пользователей')], style=dict(color='#222780', fontType='bold')),
                     html.Div([
                         html.Div([html.H4('ЕЦП')], className='line_block', style=dict(width='46%')),  # html div
                         html.Div([html.H4('СУЭ')], className='line_block', style=dict(width='46%')),  # html div
@@ -175,27 +171,25 @@ layout = html.Div([
                     html.Div([
                         html.Div([
                             dash_table.DataTable(id='table_top_etsp',
-                                                 columns=[{"name": i, "id": i} for i in etsp_top_user_df.columns],
+                                                 columns=[dict(name=i, id=i) for i in etsp_top_user_df.columns],
                                                  sort_action="native",
                                                  style_as_list_view=True,
                                                  cell_selectable=False,
-                                                 style_data={'width': '50px', 'font-size': ' 1.3em'},
+                                                 style_data=dict(width='50px', fontSize=' 1.3em'),
                                                  style_cell=dict(textAlign='center'),
-                                                 style_cell_conditional=[
-                                                     {'if': {'column_id': 'Пользователь'},
-                                                      'textAlign': 'left'}]
+                                                 style_cell_conditional=[{'if': {'column_id': 'Пользователь'},
+                                                                          'textAlign': 'left'}]
                                                  )], className='line_block', style=dict(width='46%')),
                         html.Div([
                             dash_table.DataTable(id='table_top_sue',
-                                                 columns=[{"name": i, "id": i} for i in sue_top_user_df.columns],
+                                                 columns=[dict(name=i, id=i) for i in sue_top_user_df.columns],
                                                  sort_action="native",
                                                  style_as_list_view=True,
                                                  cell_selectable=False,
                                                  style_data={'width': '50px', 'font-size': ' 1.3em'},
                                                  style_cell=dict(textAlign='center'),
-                                                 style_cell_conditional=[
-                                                     {'if': {'column_id': 'Пользователь'},
-                                                      'textAlign': 'left'}]
+                                                 style_cell_conditional=[{'if': {'column_id': 'Пользователь'},
+                                                                          'textAlign': 'left'}]
                                                  )], className='line_block', style=dict(width='46%')),
                     ]),
                 ], selected_style=tab_selected_style),  # tab user
@@ -210,7 +204,6 @@ layout = html.Div([
                                 html.Td([daq.LEDDisplay(id='total_tasks', value=254, color='#222780',
                                                         backgroundColor='#e8edff', )], rowSpan=2),
                             ]),
-
                         ], className='table_budget')
                     ], style=dict(height='165px')),
                     html.Div([
@@ -253,74 +246,57 @@ layout = html.Div([
                 dcc.Tab(label='Проекты', value='pr', children=[
                     html.Br(),
                     html.Div([
+                        html.H3('Проекты в работе', style=dict(color='#1959d1', fontType='bold'))
+                    ]),
+                    html.Div([
                         dash_table.DataTable(id='project_table',
                                              columns=[{"name": i, "id": i} for i in projects_df.columns],
                                              data=projects_df.to_dict('records'),
                                              style_as_list_view=True,
                                              cell_selectable=False,
-                                             style_table={'overflowX': 'auto'},
-                                             # sort_action="native",
-                                             style_data={
-                                                 'whiteSpace': 'normal',
-                                                 'height': 'auto'
-                                             },
-                                             style_cell={'textAlign': 'left'},
-                                             style_header={'backgroundColor': 'rgb(230, 230, 230)',
-                                                           'fontWeight': 'bold'})
-                    ], style=dict(width='98%', margin='0 auto'))
-                    # html.Br(),
-                    # html.Div([
-                    #     dcc.Dropdown(id='projects_name',
-                    #                  options=projects_names,
-                    #                  value='1',
-                    #                  style=dict(width='99%', margin='0 auto')),
-                    #     html.Br(),
-                    #     html.H4(id='project_name', style=dict(width='99%', margin='0 auto')),
-                    #     html.Br(),
-                    #     html.Div([
-                    #         html.H5('Исполнители:  '),
-                    #     ], style=dict(float='left', width='14.6%')),
-                    #     html.Div([
-                    #         html.H6(id='executor', style=dict()),
-                    #     ], style=dict(float='left', width='45%')),
-                    #     html.Div([
-                    #         html.H5('Процент выполнения:  ')
-                    #     ], style=dict(float='left', width='23.5%')),
-                    #     html.Div([
-                    #     ], style=dict(float='left', width='3%')),
-                    #     html.Div([
-                    #         # html.H5(id='persent_dd', style=dict(color='green')),
-                    #         dcc.Dropdown(id='persent_dd',
-                    #                      options=projects_persents,
-                    #                      clearable=False,
-                    #                      searchable=False,
-                    #                      disabled=True, style=dict(float='left', width='100%'))
-                    #     ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top', width='13.7%')),
-                    # ]),
-                    # html.Br(),
-                    # html.Div([
-                    #     html.Div([
-                    #         html.H5('Статус проекта:  ', style=dict(width='250px'))], style=dict(display='inline-block',
-                    #                                                                              marginRight='20px',
-                    #                                                                              verticalAlign='top')),
-                    #     html.Div([
-                    #         dcc.Dropdown(id='status',
-                    #                      options=projects_statuses,
-                    #                      clearable=False,
-                    #                      searchable=False,
-                    #                      multi=False,
-                    #                      disabled=True,
-                    #                      style=dict(width='320px'))
-                    #     ], style=dict(display='inline-block', marginRight='20px', verticalAlign='top')),
-                    # ], style=dict(float='right')),
-                    # html.Br(),
-                    # html.Div([
-                    #     html.H5('Описание проекта:'),
-                    # ], style=dict(width='200px')),
-                    # html.Div([
-                    #     dcc.Textarea(id='project_decsr', style={'width': '100%', 'height': 300})
-                    # ]),
-                    # html.Div(style=dict(backgroundColor='#ebecf1', height='300', border='1px solid black'))
+                                             style_table=dict(overflowX='auto'),
+                                             style_data=dict(whiteSpace='normal', height='auto', background='#F5F5DC'),
+                                             style_cell=dict(textAlign='left'),
+                                             style_header=dict(backgroundColor='rgb(230, 230, 230)', fontWeight='bold'),
+                                             style_cell_conditional=[{'if': {'column_id': 'Срок исполнения'},
+                                                                      'textAlign': 'center'},
+                                                                     {'if': {'column_id': 'Процент выполнения'},
+                                                                      'textAlign': 'center'},
+                                                                     {'if': {'column_id': 'Исполнитель'},
+                                                                      'textAlign': 'center', 'width': '8%'},
+                                                                     {'if': {'column_id': 'Название'},
+                                                                      'width': '30%'}],
+                                             export_format='xlsx',
+                                             )
+                    ], style=dict(width='98%', margin='0 auto')),
+                    html.Br(),
+                    html.Div([
+                        html.H3('Выполненные проекты', style=dict(color='#1F5C0A', textType='bold'))
+                    ]),
+                    html.Div([
+                        dash_table.DataTable(id='completed_projects',
+                                             columns=[{"name": i, "id": i} for i in complete_projects_df.columns],
+                                             data=complete_projects_df.to_dict('records'),
+                                             style_as_list_view=True,
+                                             cell_selectable=False,
+                                             style_table=dict(overflowX='auto'),
+                                             style_data=dict(whiteSpace='normal', height='auto', background='#c4fbdb'),
+                                             style_cell=dict(textAlign='left'),
+                                             style_header=dict(backgroundColor='rgb(230, 230, 230)', fontWeight='bold'),
+                                             style_cell_conditional=[{'if': {'column_id': 'Срок исполнения'},
+                                                                      'textAlign': 'center'},
+                                                                     {'if': {'column_id': 'Процент выполнения'},
+                                                                      'textAlign': 'center'},
+                                                                     {'if': {'column_id': 'Исполнитель'},
+                                                                      'textAlign': 'center', 'width': '8%'},
+                                                                     {'if': {'column_id': 'Название'},
+                                                                      'width': '30%'}],
+
+                                             export_format='xlsx',
+                                             # export_headers='display',
+                                             )
+                    ], style=dict(width='98%', margin='0 auto')),
+                    html.Br(),
                 ], selected_style=tab_selected_style),  # tab projects
             ], colors=dict(border='#ebecf1', primary='#222780', background='#33ccff')),  # main tabs end
             html.Div(id='tabs_content')
