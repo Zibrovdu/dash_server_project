@@ -257,7 +257,7 @@ def load_projects(projects_status='in_progress'):
                            con=engine)
     elif projects_status == 'complete':
         return pd.read_sql("""
-        select id, name, executor, persent, stage, finish_date from projects_new where persent = 100
+        select id, name, executor, persent, stage from projects_new where persent = 100
         """,
                            con=engine)
     else:

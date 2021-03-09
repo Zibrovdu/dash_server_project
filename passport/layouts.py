@@ -33,7 +33,6 @@ choice_type = [dict(label='Неделя', value='w'),
 d_month = ld.get_months(start_month, start_year, finish_month, finish_year)
 
 d_week = ld.get_weeks(start_week, start_year, finish_week, finish_year)
-print(d_week)
 
 tooltips_table_site = [{'Визиты': 'Суммарное количество визитов.', 'Посетители': 'Количество уникальных посетителей.',
                         'Просмотры': 'Число просмотров страниц на сайте за выбранный период.',
@@ -46,15 +45,12 @@ projects_df = ld.load_projects()
 projects_df['id'] = pd.Series([x for x in range(1, len(projects_df)+1)])
 projects_df = projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
 projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
-# projects_df['Процент выполнения'] = projects_df['Процент выполнения'].apply(lambda x: ''.join([str(x * 100), '%']))
-print(len(projects_df))
+
 complete_projects_df = ld.load_projects('complete')
 complete_projects_df['id'] = pd.Series([x for x in range(1, len(complete_projects_df)+1)])
-complete_projects_df = complete_projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
-complete_projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
-# complete_projects_df['Процент выполнения'] = complete_projects_df['Процент выполнения'].apply(
-#     lambda x: ''.join([str(x * 100), '%']))
-print(len(complete_projects_df))
+complete_projects_df = complete_projects_df[['id', 'name', 'executor', 'persent', 'stage']]
+complete_projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание']
+
 layout = html.Div([
     html.Div([
         html.H2('Отдел сопровождения пользователей'),
@@ -100,7 +96,6 @@ layout = html.Div([
                                                 updatemode='bothdates',
                                                 style=dict(background='#b1d5fa'),
                                                 clearable=False
-                                                # with_portal=True
                                                 )])], className='bblock',
                  style=dict(heigth='45px')),  # Period_choice range picker
     ], style=dict(background='#b1d5fa')),
@@ -287,17 +282,14 @@ layout = html.Div([
                                              style_data=dict(whiteSpace='normal', height='auto', background='#c4fbdb'),
                                              style_cell=dict(textAlign='left'),
                                              style_header=dict(backgroundColor='rgb(230, 230, 230)', fontWeight='bold'),
-                                             style_cell_conditional=[{'if': {'column_id': 'Срок исполнения'},
-                                                                      'textAlign': 'center'},
-                                                                     {'if': {'column_id': 'Процент выполнения'},
+                                             style_cell_conditional=[{'if': {'column_id': 'Процент выполнения'},
                                                                       'textAlign': 'center'},
                                                                      {'if': {'column_id': 'Исполнитель'},
                                                                       'textAlign': 'center', 'width': '8%'},
                                                                      {'if': {'column_id': 'Название'},
                                                                       'width': '30%'}],
 
-                                             export_format='xlsx',
-                                             # export_headers='display',
+                                             export_format='xlsx'
                                              )
                     ], style=dict(width='98%', margin='0 auto')),
                     html.Br(),

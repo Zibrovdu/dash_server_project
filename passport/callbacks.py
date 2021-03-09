@@ -2,7 +2,6 @@ from dash.dependencies import Input, Output
 import datetime as dt
 import passport.load_data as ld
 import passport.site_info as si
-# import passport.log_writer as lw
 import passport.figures as pf
 from passport.layouts import etsp_df, sue_df, osp_df, inf_systems_data, sue_incidents_df
 
