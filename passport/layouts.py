@@ -1,9 +1,9 @@
+import datetime as dt
+import calendar
+import pandas as pd
 import dash_core_components as dcc
 import dash_html_components as html
-import calendar
-import datetime as dt
 import dash_table
-import pandas as pd
 import dash_daq as daq
 import passport.load_data as ld
 
@@ -164,8 +164,8 @@ layout = html.Div([
                     html.Br(),
                     html.Div([html.H3('ТОП-5 пользователей')], style=dict(color='#222780', fontType='bold')),
                     html.Div([
-                        html.Div([html.H4('ЕЦП')], className='line_block', style=dict(width='46%')),  # html div
-                        html.Div([html.H4('СУЭ')], className='line_block', style=dict(width='46%')),  # html div
+                        html.Div([html.H4('ЕЦП')], className='line_block', style=dict(width='46%')),
+                        html.Div([html.H4('СУЭ')], className='line_block', style=dict(width='46%')),
                     ]),
                     html.Div([
                         html.Div([
@@ -240,12 +240,13 @@ layout = html.Div([
                         html.Div([dcc.Graph(id='el_budget_graph_mean_time')], className='line_block',
                                  style=dict(width='37%')),
                         html.Div([dcc.Graph(id='el_budget_graph')], className='line_block', style=dict(width='56%')),
+                        html.Div([dcc.Graph(id='gossluzba_pagedept')], className='line_block', style=dict(width='50%'))
                     ]),
                 ], selected_style=tab_selected_style),  # tab site
-                dcc.Tab(label='Проекты', value='pr', children=[
+                dcc.Tab(label='Задачи/проекты', value='pr', children=[
                     html.Br(),
                     html.Div([
-                        html.H3('Проекты в работе', style=dict(color='#1959d1', fontType='bold'))
+                        html.H3('Задачи/проекты в работе', style=dict(color='#1959d1', fontType='bold'))
                     ]),
                     html.Div([
                         dash_table.DataTable(id='project_table',
@@ -270,7 +271,7 @@ layout = html.Div([
                     ], style=dict(width='98%', margin='0 auto')),
                     html.Br(),
                     html.Div([
-                        html.H3('Выполненные проекты', style=dict(color='#1F5C0A', textType='bold'))
+                        html.H3('Выполненные задачи/проекты', style=dict(color='#1F5C0A', textType='bold'))
                     ]),
                     html.Div([
                         dash_table.DataTable(id='completed_projects',

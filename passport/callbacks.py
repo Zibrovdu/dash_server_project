@@ -1,5 +1,5 @@
-from dash.dependencies import Input, Output
 import datetime as dt
+from dash.dependencies import Input, Output
 import passport.load_data as ld
 import passport.site_info as si
 import passport.figures as pf
@@ -54,6 +54,7 @@ def register_callbacks(app):
         Output('site_line_graph', 'figure'),
         Output('el_budget_graph', 'figure'),
         Output('el_budget_graph_mean_time', 'figure'),
+        Output('gossluzba_pagedept', 'figure'),
         [Input('period_choice', 'start_date'),
          Input('period_choice', 'end_date'),
          Input('month_choice', 'value'),
@@ -69,14 +70,14 @@ def register_callbacks(app):
                                              choice_type_period)
         osp_filtered_df = ld.get_filtered_df(osp_df, start_date_user, end_date_user, choosen_month, choosen_week,
                                              choice_type_period)
-        sue_incidents_filtered_df = ld.get_filtered_incidents_df(sue_incidents_df, start_date_user, end_date_user,
-                                                                 choosen_month, choosen_week, choice_type_period)
+        sue_incidents_filtered_df = ld.get_filtered_df(sue_incidents_df, start_date_user, end_date_user,
+                                                       choosen_month, choosen_week, choice_type_period)
 
-        etsp_prev_filt_df = ld.get_prev_filtered_df(etsp_df, start_date_user, choosen_month, choosen_week,
-                                                    choice_type_period)
-        sue_prev_filt_df = ld.get_prev_filtered_df(sue_df, start_date_user, choosen_month, choosen_week,
+        etsp_prev_filt_df = ld.get_prev_filtered_df(etsp_df, start_date_user, end_date_user, choosen_month,
+                                                    choosen_week, choice_type_period)
+        sue_prev_filt_df = ld.get_prev_filtered_df(sue_df, start_date_user, end_date_user, choosen_month, choosen_week,
                                                    choice_type_period)
-        osp_prev_filt_df = ld.get_prev_filtered_df(osp_df, start_date_user, choosen_month, choosen_week,
+        osp_prev_filt_df = ld.get_prev_filtered_df(osp_df, start_date_user, end_date_user, choosen_month, choosen_week,
                                                    choice_type_period)
 
         start_date_metrika, end_date_metrika = ld.get_date_for_metrika_df(start_date_user, end_date_user, choosen_month,
@@ -109,6 +110,7 @@ def register_callbacks(app):
 
         budget_graph_df = si.get_el_budget_data(filtered_metrika_df, si.NamesElBudgetPages.names_el_budget_section_dict)
 
+        gossluzba_df = si.get_gossluzba_data(filtered_metrika_df, si.NamesGossluzbaPages.names_gossluzba_dict)
         # --------------------------------------------FIGURES----------------------------------------------------------
         fig_support = pf.plot_figure_support(etsp_count_tasks, sue_count_tasks, osp_count_tasks)
 
@@ -122,6 +124,8 @@ def register_callbacks(app):
 
         el_budget_graph_mean_time = pf.plot_el_budget_graph_mean_time(
             budget_graph_df, si.NamesElBudgetPages.names_el_budget_section_dict)
+
+        gossluzba_pagedept_graph = pf.plot_gossluzba_graph_page_dept(gossluzba_df)
 
         # -----------------------------------DIFF-TASKS-AND-USERS------------------------------------------------------
         total_curr_tasks = etsp_count_tasks + sue_count_tasks + osp_count_tasks
@@ -159,4 +163,4 @@ def register_callbacks(app):
                 style_users, etsp_avg_time, sue_avg_time, osp_avg_time, support_pie_figure,
                 sue_incidents_filtered_df.to_dict('records'), style_data, etsp_top_user_filtered_df.to_dict('records'),
                 sue_top_user_filtered_df.to_dict('records'), site_stat_data, tooltip_data, fig_site_top,
-                site_line_graph, el_budget_graph, el_budget_graph_mean_time)
+                site_line_graph, el_budget_graph, el_budget_graph_mean_time, gossluzba_pagedept_graph)
