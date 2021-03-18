@@ -323,6 +323,46 @@ def plot_gossluzba_graph_page_dept(filtered_metrika_df):
             textposition='outside'))
     fig.update_traces(textfont_size=10, textfont_family='Arial Black', showlegend=True)
     fig.update_layout(title_text='Глубина просмотра раздела "Государственная служба в МБУ ФК"', paper_bgcolor='#ebecf1',
-                      plot_bgcolor='#ebecf1')
+                      plot_bgcolor='#ebecf1', title_xref='paper')
 
+    return fig
+
+
+def visits_gossluzba_site(filtered_metrika_df):
+    """
+    Синтаксис:
+    ----------
+    **plot_gossluzba_graph_page_dept** (filtered_metrika_df)
+
+    Описание:
+    ---------
+    Функция отвечает за построение графика (линейные графики) отображающие количество визитов и уникальных
+    пользователей посетивших раздел сайта "Государственная служба в МБУ ФК"
+
+    Параметры:
+    ----------
+        **filtered_metrika_df**: *DataFrame* - датафрейм содержащий информацию о глубине просмотра раздела сайта
+        "Государственная служба в МБУ ФК", полученную из Яндекс.Метрики
+
+    Returns:
+    ----------
+        **Figure**
+    """
+    fig = go.Figure(data=[
+        go.Scatter(y=list(filtered_metrika_df.groupby(['date'])['users'].sum()),
+                   x=list(filtered_metrika_df.groupby(['date'])['users'].sum().index),
+                   mode='lines+markers',
+                   marker=dict(color='#4eac01', size=6),
+                   line=dict(color='#4eac01', width=5),
+                   name='Визиты'),
+        go.Scatter(y=list(filtered_metrika_df.groupby(['date'])['visits'].sum()),
+                   x=list(filtered_metrika_df.groupby(['date'])['visits'].sum().index),
+                   mode='lines+markers',
+                   marker=dict(color='#e93667', size=6),
+                   line=dict(color='#e93667', width=5),
+                   name='Пользователи')
+    ])
+    fig.update_traces(textfont_size=10, textfont_family='Arial Black', showlegend=True)
+    fig.update_layout(title_text='Посещение раздела "Государственная служба в МБУ ФК"', paper_bgcolor='#ebecf1',
+                      plot_bgcolor='#ebecf1', title_xref='paper')
     return fig

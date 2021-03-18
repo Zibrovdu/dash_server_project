@@ -240,7 +240,8 @@ layout = html.Div([
                         html.Div([dcc.Graph(id='el_budget_graph_mean_time')], className='line_block',
                                  style=dict(width='37%')),
                         html.Div([dcc.Graph(id='el_budget_graph')], className='line_block', style=dict(width='56%')),
-                        html.Div([dcc.Graph(id='gossluzba_pagedept')], className='line_block', style=dict(width='50%'))
+                        html.Div([dcc.Graph(id='gossluzba_pagedept')], className='line_block', style=dict(width='46%')),
+                        html.Div([dcc.Graph(id='gossluzba_visits')], className='line_block', style=dict(width='46%'))
                     ]),
                 ], selected_style=tab_selected_style),  # tab site
                 dcc.Tab(label='Задачи/проекты', value='pr', children=[

@@ -55,6 +55,7 @@ def register_callbacks(app):
         Output('el_budget_graph', 'figure'),
         Output('el_budget_graph_mean_time', 'figure'),
         Output('gossluzba_pagedept', 'figure'),
+        Output('gossluzba_visits', 'figure'),
         [Input('period_choice', 'start_date'),
          Input('period_choice', 'end_date'),
          Input('month_choice', 'value'),
@@ -127,6 +128,8 @@ def register_callbacks(app):
 
         gossluzba_pagedept_graph = pf.plot_gossluzba_graph_page_dept(gossluzba_df)
 
+        gossluzba_visits_graph = pf.visits_gossluzba_site(gossluzba_df)
+
         # -----------------------------------DIFF-TASKS-AND-USERS------------------------------------------------------
         total_curr_tasks = etsp_count_tasks + sue_count_tasks + osp_count_tasks
         total_prev_tasks = etsp_prev_count_tasks + sue_prev_count_tasks + osp_prev_count_tasks
@@ -163,4 +166,5 @@ def register_callbacks(app):
                 style_users, etsp_avg_time, sue_avg_time, osp_avg_time, support_pie_figure,
                 sue_incidents_filtered_df.to_dict('records'), style_data, etsp_top_user_filtered_df.to_dict('records'),
                 sue_top_user_filtered_df.to_dict('records'), site_stat_data, tooltip_data, fig_site_top,
-                site_line_graph, el_budget_graph, el_budget_graph_mean_time, gossluzba_pagedept_graph)
+                site_line_graph, el_budget_graph, el_budget_graph_mean_time, gossluzba_pagedept_graph,
+                gossluzba_visits_graph)
