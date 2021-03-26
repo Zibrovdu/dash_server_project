@@ -3,7 +3,8 @@ from dash.dependencies import Input, Output
 import passport.load_data as ld
 import passport.site_info as si
 import passport.figures as pf
-from passport.layouts import etsp_df, sue_df, osp_df, inf_systems_data, sue_incidents_df
+from passport.layouts import inf_systems_data
+from passport.load_cfg import etsp_table_name, sue_table_name, osp_table_name
 
 
 def register_callbacks(app):
@@ -65,21 +66,21 @@ def register_callbacks(app):
     def update_figure_user(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
         period_choice, week_choice, month_choice = ld.choosen_type(choice_type_period, start_date_user, end_date_user,
                                                                    choosen_month, choosen_week)
-        etsp_filtered_df = ld.get_filtered_df(etsp_df, start_date_user, end_date_user, choosen_month, choosen_week,
-                                              choice_type_period)
-        sue_filtered_df = ld.get_filtered_df(sue_df, start_date_user, end_date_user, choosen_month, choosen_week,
-                                             choice_type_period)
-        osp_filtered_df = ld.get_filtered_df(osp_df, start_date_user, end_date_user, choosen_month, choosen_week,
-                                             choice_type_period)
-        sue_incidents_filtered_df = ld.get_filtered_df(sue_incidents_df, start_date_user, end_date_user,
-                                                       choosen_month, choosen_week, choice_type_period)
+        etsp_filtered_df = ld.get_filtered_df_new(etsp_table_name, start_date_user, end_date_user, choosen_month,
+                                                  choosen_week, choice_type_period)
+        sue_filtered_df = ld.get_filtered_df_new(sue_table_name, start_date_user, end_date_user, choosen_month,
+                                                 choosen_week, choice_type_period)
+        osp_filtered_df = ld.get_filtered_df_new(osp_table_name, start_date_user, end_date_user, choosen_month,
+                                                 choosen_week, choice_type_period)
+        sue_incidents_filtered_df = ld.get_filtered_incidents_df_db(start_date_user, end_date_user, choosen_month,
+                                                                    choosen_week, choice_type_period)
 
-        etsp_prev_filt_df = ld.get_prev_filtered_df(etsp_df, start_date_user, end_date_user, choosen_month,
-                                                    choosen_week, choice_type_period)
-        sue_prev_filt_df = ld.get_prev_filtered_df(sue_df, start_date_user, end_date_user, choosen_month, choosen_week,
-                                                   choice_type_period)
-        osp_prev_filt_df = ld.get_prev_filtered_df(osp_df, start_date_user, end_date_user, choosen_month, choosen_week,
-                                                   choice_type_period)
+        etsp_prev_filt_df = ld.get_prev_filtered_df_db(etsp_table_name, start_date_user, end_date_user, choosen_month,
+                                                       choosen_week, choice_type_period)
+        sue_prev_filt_df = ld.get_prev_filtered_df_db(sue_table_name, start_date_user, end_date_user, choosen_month,
+                                                      choosen_week, choice_type_period)
+        osp_prev_filt_df = ld.get_prev_filtered_df_db(osp_table_name, start_date_user, end_date_user, choosen_month,
+                                                      choosen_week, choice_type_period)
 
         start_date_metrika, end_date_metrika = ld.get_date_for_metrika_df(start_date_user, end_date_user, choosen_month,
                                                                           choosen_week, choice_type_period)

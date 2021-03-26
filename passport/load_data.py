@@ -707,3 +707,127 @@ def get_date_for_metrika_df(start_date_user, end_date_user, choosen_month, choos
         end_date_metrika = get_period(year_metrika, choosen_week, 's')[1]
 
     return start_date_metrika, end_date_metrika
+
+
+def get_filtered_df_new(table_name, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    if choice_type_period == 'm':
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM {table_name} 
+            WHERE month_open = {int(choosen_month)}""", con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        return df
+
+    elif choice_type_period == 'p':
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM {table_name} 
+            WHERE reg_date >= '{start_date_user} 00:00:00' 
+                AND reg_date <='{end_date_user} 23:59:59'
+        """, con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        return df
+    else:
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM {table_name} 
+            WHERE week_open = {int(choosen_week)}
+        """, con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        return df
+
+
+def get_prev_filtered_df_db(table_name, start_date_user, end_date_user, choosen_month, choosen_week,
+                            choice_type_period):
+    if choice_type_period == 'm':
+        if int(choosen_month) > 1:
+            df = pd.read_sql(f"""
+                SELECT * 
+                FROM {table_name} 
+                WHERE month_open = {int(choosen_month) - 1}
+            """, con=engine)
+            df.timedelta = pd.to_timedelta(df.timedelta)
+            return df
+        else:
+            df = pd.read_sql(f"""
+                SELECT * 
+                FROM {table_name} 
+                WHERE month_open = 12
+            """, con=engine)
+            df.timedelta = pd.to_timedelta(df.timedelta)
+            return df
+
+    elif choice_type_period == 'p':
+        delta = dt.datetime.strptime(end_date_user, '%Y-%m-%d') - dt.datetime.strptime(start_date_user, '%Y-%m-%d')
+        prev_start_date = dt.datetime.strftime((dt.datetime.strptime(start_date_user, '%Y-%m-%d') - delta), '%Y-%m-%d')
+        prev_end_date = dt.datetime.strftime((dt.datetime.strptime(end_date_user, '%Y-%m-%d') - delta), '%Y-%m-%d')
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM {table_name} 
+            WHERE reg_date >= '{prev_start_date} 00:00:00' 
+                AND reg_date <='{prev_end_date} 23:59:59'
+        """, con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        return df
+
+    else:
+        if int(choosen_week) > 1:
+            df = pd.read_sql(f"""
+                SELECT * 
+                FROM {table_name} 
+                WHERE week_open = {int(choosen_week) - 1}
+            """, con=engine)
+            df.timedelta = pd.to_timedelta(df.timedelta)
+            return df
+        else:
+            df = pd.read_sql(f"""
+                SELECT * 
+                FROM {table_name} 
+                WHERE week_open = {52}
+            """, con=engine)
+            df.timedelta = pd.to_timedelta(df.timedelta)
+            return df
+
+
+def get_filtered_incidents_df_db(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    if choice_type_period == 'm':
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM sue_data 
+            WHERE (status = 'Проблема' or status = 'Массовый инцидент') 
+                AND month_open = {int(choosen_month)}
+        """, con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        df.columns = ['Дата обращения', 'Тип', 'Номер', 'Описание', 'Плановое время', 'Фактическое время',
+                      'Пользователь', 'timedelta', 'Отдел', 'Дата', 'finish_date', 'month_open',
+                      'month_solved', 'week_open', 'week_solved', 'count_task']
+        return df
+
+    elif choice_type_period == 'p':
+        delta = dt.datetime.strptime(end_date_user, '%Y-%m-%d') - dt.datetime.strptime(start_date_user, '%Y-%m-%d')
+        prev_start_date = dt.datetime.strftime((dt.datetime.strptime(start_date_user, '%Y-%m-%d') - delta), '%Y-%m-%d')
+        prev_end_date = dt.datetime.strftime((dt.datetime.strptime(end_date_user, '%Y-%m-%d') - delta), '%Y-%m-%d')
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM sue_data 
+            WHERE (status = 'Проблема' or status = 'Массовый инцидент') 
+               AND (reg_date >= '{prev_start_date} 00:00:00' and reg_date <='{prev_end_date} 23:59:59')
+        """, con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        df.columns = ['Дата обращения', 'Тип', 'Номер', 'Описание', 'Плановое время', 'Фактическое время',
+                      'Пользователь', 'timedelta', 'Отдел', 'Дата', 'finish_date', 'month_open', 'month_solved',
+                      'week_open', 'week_solved', 'count_task']
+        return df
+
+    else:
+        df = pd.read_sql(f"""
+            SELECT * 
+            FROM sue_data 
+            WHERE (status = 'Проблема' or status = 'Массовый инцидент')
+                AND week_open = {int(choosen_week)}
+        """, con=engine)
+        df.timedelta = pd.to_timedelta(df.timedelta)
+        df.columns = ['Дата обращения', 'Тип', 'Номер', 'Описание', 'Плановое время', 'Фактическое время',
+                      'Пользователь', 'timedelta', 'Отдел', 'Дата', 'finish_date', 'month_open', 'month_solved',
+                      'week_open', 'week_solved', 'count_task']
+        return df
