@@ -80,7 +80,7 @@ def plot_support_pie_figure(etsp_filtered_df, sue_filtered_df, osp_filtered_df):
                values=support_pie_figure_values,
                marker_colors=support_pie_figure_colors))
 
-    support_pie_figure.update_traces(hoverinfo="label+percent+name")
+    support_pie_figure.update_traces(hoverinfo="label+percent")
 
     support_pie_figure.update_layout(paper_bgcolor='#ebecf1', showlegend=True)
 
