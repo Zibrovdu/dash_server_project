@@ -870,7 +870,5 @@ def names_to_db(project_user):
     else:
         names_string = ''
         for item in project_user:
-            print(item)
             names_string = ''.join([names_string, '/', item])
-            print(names_string)
         return names_string[1:]

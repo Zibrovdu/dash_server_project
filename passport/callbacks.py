@@ -5,6 +5,7 @@ import pandas as pd
 import passport.load_data as ld
 import passport.site_info as si
 import passport.figures as pf
+import passport.log_writer as lw
 from passport.layouts import inf_systems_data
 from passport.load_cfg import etsp_table_name, sue_table_name, osp_table_name
 
@@ -284,9 +285,7 @@ def register_callbacks(app):
     )
     def choose_project_mod(value):
         if value:
-            print(value)
             df = ld.load_projects('in_progress', value)
-            print(df)
             finish_date = df.finish_date.loc[0]
             if len(finish_date) > 2:
                 return df.executor.loc[0].split('/'), df.persent.loc[0], df.stage.loc[0], dt.date(int(finish_date[:4]),
@@ -311,7 +310,6 @@ def register_callbacks(app):
 
         project_user = ld.names_to_db(project_user)
         row_modify = [project_name, project_user, project_persent, project_descr, project_end_date]
-        print(row_modify)
 
         return row_modify
 
@@ -326,8 +324,6 @@ def register_callbacks(app):
     def update_projects_info(n, row_modify):
         if not row_modify:
             return 'Please choose project to update', " "
-        print(row_modify)
-        print(type(row_modify))
         if n:
             if len(row_modify) == 5:
                 df = ld.load_projects('all')
@@ -340,9 +336,10 @@ def register_callbacks(app):
                 projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание',
                                        'Срок исполнения']
 
-                print('update')
+                lw.log_writer('Обновление информации успешно завершено')
 
                 return 'Обновление информации успешно завершено', "/"
             else:
-                print('no_update')
+                lw.log_writer('При обновлении информации произошел сбой')
+                lw.log_writer(row_modify)
                 return 'При обновлении информации произошел сбой', " "
