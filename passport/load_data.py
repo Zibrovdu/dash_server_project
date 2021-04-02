@@ -213,7 +213,7 @@ def count_mean_time(filtered_df):
     else:
         avg_time = f'{avg_time[0]} дн. {avg_time[1]} час. {avg_time[2]} мин.'
 
-    return avg_time
+    return '-' #avg_time
 
 
 def load_inf_systems_data():

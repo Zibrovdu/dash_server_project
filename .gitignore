@@ -5,3 +5,12 @@
 /logs
 *.log
 .idea
+.bash_history
+.cache
+.gitconfig
+.local
+.ssh
+*.py1
+*.ini
+venv
+passport/__pycache__
