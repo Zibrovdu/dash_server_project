@@ -1,5 +1,7 @@
 import datetime as dt
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import dash
+import pandas as pd
 import passport.load_data as ld
 import passport.site_info as si
 import passport.figures as pf
@@ -169,3 +171,178 @@ def register_callbacks(app):
                 sue_top_user_filtered_df.to_dict('records'), site_stat_data, tooltip_data, fig_site_top,
                 site_line_graph, el_budget_graph, el_budget_graph_mean_time, gossluzba_pagedept_graph,
                 gossluzba_visits_graph)
+
+    @app.callback(
+        Output("modal-scroll", "is_open"),
+        [Input("open-scroll", "n_clicks"), Input("close-scroll", "n_clicks")],
+        [State("modal-scroll", "is_open")],
+    )
+    def toggle_modal(n1, n2, is_open):
+        if n1 or n2:
+            return not is_open
+        return is_open
+
+    @app.callback(
+        Output('example-output', 'children'),
+        [Input('input_pr', 'value'),
+         Input('input_user', 'value'),
+         Input('input_pers', 'value'),
+         Input('input_descr', 'value'),
+         Input('date_pr', 'date')
+         ])
+    def fill_form(project_name, project_user, project_persent, project_descr, project_end_date):
+
+        project_user = ld.names_to_db(project_user)
+
+        row = [project_name, project_user, project_persent, project_descr, project_end_date]
+
+        return row
+
+    @app.callback(
+        Output('project_table', 'data'),
+        Output('fill_project_name', 'children'),
+        Output('fill_project_name', 'style'),
+        Output('fill_project_user', 'children'),
+        Output('fill_project_user', 'style'),
+        Output('fill_project_persent', 'children'),
+        Output('fill_project_persent', 'style'),
+        Output('fill_project_descr', 'children'),
+        Output('fill_project_descr', 'style'),
+        Output('fill_project_end_date', 'children'),
+        Output('fill_project_end_date', 'style'),
+        Output("url_1", "href"),
+        Input('save_btn', 'n_clicks'),
+        State('example-output', 'children'),
+        prevent_initial_call=True,
+    )
+    def save_btn_clicked(n, row):
+        if n:
+            style_warning = {"color": "red"}
+            msg_warning = 'Заполните поле!!!'
+            style_ok = {"color": "white"}
+            msg_ok = ' '
+            if row[0] is None:
+                return dash.no_update, msg_warning, style_warning, dash.no_update, dash.no_update, dash.no_update, \
+                       dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, "/"
+            elif row[1] is None:
+                return dash.no_update, dash.no_update, dash.no_update, msg_warning, style_warning, dash.no_update, \
+                       dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, "/"
+            elif row[2] is None:
+                return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, msg_warning, \
+                       style_warning, dash.no_update, dash.no_update, dash.no_update, dash.no_update, "/"
+            elif row[3] is None:
+                return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, \
+                       dash.no_update, msg_warning, style_warning, dash.no_update, dash.no_update, "/"
+            elif row[4] is None:
+                return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, \
+                       dash.no_update, dash.no_update, dash.no_update, msg_warning, style_warning, "/"
+            else:
+                df = pd.DataFrame(columns=['name', 'executor', 'persent', 'stage', 'finish_date'])
+                df.loc[0] = row
+                df.to_sql('projects_new', con=ld.engine, index=False, if_exists='append')
+                projects_df = ld.load_projects()
+                projects_df['id'] = pd.Series([x for x in range(1, len(projects_df) + 1)])
+                projects_df = projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
+                projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание',
+                                       'Срок исполнения']
+
+                return (projects_df.to_dict('records'), msg_ok, style_ok, msg_ok, style_ok, msg_ok, style_ok, msg_ok,
+                        style_ok, msg_ok, style_ok, "/")
+        else:
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, \
+                   dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, "/"
+
+    @app.callback(
+        Output('input_pr', 'value'),
+        Output('input_user', 'value'),
+        Output('input_pers', 'value'),
+        Output('input_descr', 'value'),
+        [Input('clear', 'n_clicks')]
+    )
+    def clear_btn_clicked(n):
+        if n:
+            return '', '', 0, ''
+        else:
+            return dash.no_update
+
+    @app.callback(
+        Output("modify_window", "is_open"),
+        [Input("open_modify_win", "n_clicks"), Input("btn_close_modify", "n_clicks")],
+        [State("modify_window", "is_open")],
+    )
+    def toggle_modal_modify(n1, n2, is_open):
+        if n1 or n2:
+            return not is_open
+        return is_open
+
+    @app.callback(
+        Output('input_user_modify', 'value'),
+        Output('input_pers_modify', 'value'),
+        Output('input_descr_modify', 'value'),
+        Output('date_pr_modify', 'date'),
+        Input('choose_project_mod', 'value')
+    )
+    def choose_project_mod(value):
+        if value:
+            print(value)
+            df = ld.load_projects('in_progress', value)
+            print(df)
+            finish_date = df.finish_date.loc[0]
+            if len(finish_date) > 2:
+                return df.executor.loc[0].split('/'), df.persent.loc[0], df.stage.loc[0], dt.date(int(finish_date[:4]),
+                                                                                                  int(finish_date[5:7]),
+                                                                                                  int(finish_date[
+                                                                                                      8:10]))
+            else:
+                finish_date = dt.date(1900, 1, 1)
+                return df.executor.loc[0].split('/'), df.persent.loc[0], df.stage.loc[0], finish_date
+        else:
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+    @app.callback(
+        Output('example-output_modify', 'children'),
+        [Input('choose_project_mod', 'value'),
+         Input('input_user_modify', 'value'),
+         Input('input_pers_modify', 'value'),
+         Input('input_descr_modify', 'value'),
+         Input('date_pr_modify', 'date')
+         ])
+    def fill_form_modify(project_name, project_user, project_persent, project_descr, project_end_date):
+
+        project_user = ld.names_to_db(project_user)
+        row_modify = [project_name, project_user, project_persent, project_descr, project_end_date]
+        print(row_modify)
+
+        return row_modify
+
+    @app.callback(
+        Output('mod_project_name', 'children'),
+        Output("url", "href"),
+        Input('btn_save_modify', 'n_clicks'),
+        State('example-output_modify', 'children'),
+        prevent_initial_call=True,
+
+    )
+    def update_projects_info(n, row_modify):
+        if not row_modify:
+            return 'Please choose project to update', " "
+        print(row_modify)
+        print(type(row_modify))
+        if n:
+            if len(row_modify) == 5:
+                df = ld.load_projects('all')
+                mask = df[df['name'] == row_modify[0]].index
+                df.loc[mask, ['executor', 'persent', 'stage', 'finish_date']] = row_modify[1:5]
+                df.to_sql('projects_new', con=ld.engine, index=False, if_exists='replace')
+                projects_df = ld.load_projects()
+                projects_df['id'] = pd.Series([x for x in range(1, len(projects_df) + 1)])
+                projects_df = projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
+                projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание',
+                                       'Срок исполнения']
+
+                print('update')
+
+                return 'Обновление информации успешно завершено', "/"
+            else:
+                print('no_update')
+                return 'При обновлении информации произошел сбой', " "

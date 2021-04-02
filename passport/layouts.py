@@ -3,16 +3,15 @@ import calendar
 import pandas as pd
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 import dash_table
 import dash_daq as daq
 import passport.load_data as ld
-
 
 inf_systems_data = ld.load_inf_systems_data()
 
 
 def serve_layout():
-
     etsp_df = ld.load_etsp_data()
     etsp_top_user_df = ld.top_user(etsp_df)
 
@@ -50,11 +49,18 @@ def serve_layout():
     projects_df = projects_df[['id', 'name', 'executor', 'persent', 'stage', 'finish_date']]
     projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
 
+    modify_projects_dcc = [{'label': i, 'value': i} for i in projects_df['Название']]
+
     complete_projects_df = ld.load_projects('complete')
     complete_projects_df['id'] = pd.Series([x for x in range(1, len(complete_projects_df) + 1)])
     complete_projects_df = complete_projects_df[['id', 'name', 'executor', 'persent', 'stage']]
     complete_projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание']
+
+    osp_staff_projects = ld.get_osp_names_projects()
+
     layout = html.Div([
+        dcc.Location(id='url', refresh=True),  # Обновление после нажатия кнопки сохранить и закрыть (редактирование)
+        dcc.Location(id='url_1', refresh=True),  # Обновление после нажатия кнопки сохранить и закрыть (создание)
         html.Div([
             html.H2('Отдел сопровождения пользователей'),
             html.Img(src="assets/logo.png")
@@ -125,10 +131,6 @@ def serve_layout():
                                     html.Td(id='etsp-time'),
                                     html.Td(id='sue-time'),
                                     html.Td(id='osp-time')
-                                ]),
-                                html.Tr([
-                                ]),
-                                html.Tr([
                                 ]),
                             ])], className='line_block', style=dict(width='60%')),  # table_1
                             html.Div([html.Label('Аварийные инциденты'),
@@ -252,10 +254,147 @@ def serve_layout():
                                      style=dict(width='46%'))
                         ]),
                     ], selected_style=tab_selected_style),  # tab site
-                    dcc.Tab(label='Задачи/проекты', value='pr', children=[
+                    dcc.Tab(label='Задачи / проекты', value='pr', children=[
                         html.Br(),
                         html.Div([
-                            html.H3('Задачи/проекты в работе', style=dict(color='#1959d1', fontType='bold'))
+                            html.Div([
+                                html.Button('Создать новую задачу / проект', id="open-scroll", className='add_mod_btn'),
+                            ], className='add_mod_div'),
+
+                            dbc.Modal(
+                                [dbc.ModalHeader("Добавление нового проекта"),
+                                 dbc.ModalBody(
+                                     html.Div([
+                                         html.Span(id="example-output", style=dict(color="#ebecf1"), hidden=True),
+                                         html.H5('Название задачи / проекта: '),
+                                         dcc.Input(id="input_pr",
+                                                   placeholder="Введите название задачи / проекта...",
+                                                   type="text",
+                                                   required=True,
+                                                   # debounce=True,
+                                                   minLength=5,
+                                                   style=dict(width='100%')),
+                                         html.Br(),
+                                         html.Span(id="fill_project_name", style=dict(color="#ebecf1"), hidden=True),
+                                         html.Br(),
+                                         html.H5('Исполнители:'),
+                                         dcc.Dropdown(id='input_user',
+                                                      style=dict(width='100%'),
+                                                      options=osp_staff_projects,
+                                                      multi=True,
+                                                      ),
+                                         html.Span(id='fill_project_user', style=dict(color="#ebecf1"), hidden=True),
+                                         html.Br(),
+                                         html.H5('Процент выполнения:'),
+                                         dcc.Input(id="input_pers",
+                                                   placeholder="Укажите процент выполнения задачи...",
+                                                   type="number",
+                                                   required=True,
+                                                   # debounce=True,
+                                                   style=dict(width='100%')),
+                                         html.Span(id='fill_project_persent', style=dict(color="#ebecf1"), hidden=True),
+                                         html.Br(),
+                                         html.H5('Описание задачи / проекта:'),
+                                         dcc.Textarea(id="input_descr",
+                                                      placeholder="Введите описание задачи / проекта...",
+                                                      required=True,
+                                                      minLength=20,
+                                                      style=dict(width='100%')),
+                                         html.Span(id='fill_project_descr', style=dict(color="#ebecf1"), hidden=True),
+                                         html.Br(),
+                                         html.H5('Плановая дата выполнения:'),
+                                         dcc.DatePickerSingle(id='date_pr',
+                                                              min_date_allowed=dt.date.today(),
+                                                              display_format='DD-MM-YYYY',
+                                                              style=dict(float='left')),
+                                         html.Span(id='fill_project_end_date', style=dict(color="#ebecf1")),
+                                         html.Div([], style=dict(width='50%')),
+                                         html.Div([
+                                             html.Button("Очистить", id='clear', className='clear_btn'),
+                                             html.Button("Сохранить", id='save_btn', className='confirm_btn'),
+                                         ], style=dict(float='right', position='relative', margin='0 auto')),
+                                     ]),
+                                 ),
+                                 dbc.ModalFooter(
+                                     html.Button("Закрыть", id="close-scroll", className="button")
+                                 ),
+                                 ],
+                                id="modal-scroll",
+                                backdrop='static',
+                                size="xl",
+                            ),
+                            html.Div([
+                                html.Button('Изменить задачу / проект', id='open_modify_win', className='add_mod_btn'),
+                            ], className='add_mod_div'),
+
+                            dbc.Modal(
+                                [dbc.ModalHeader("Редактирование задачи / проекта"),
+                                 dbc.ModalBody(
+                                     html.Div([
+                                         html.Span(id="example-output_modify", hidden=True, style={"color": "#ebecf1"}),
+                                         html.H5('Выберите задачу / проект для редактирования'),
+                                         dcc.Dropdown(id='choose_project_mod',
+                                                      style=dict(width='100%'),
+                                                      value=None,
+                                                      options=modify_projects_dcc,
+                                                      ),
+                                         html.Br(),
+
+                                         html.Br(),
+                                         html.H5('Исполнители:'),
+                                         dcc.Dropdown(id='input_user_modify',
+                                                      style=dict(width='100%'),
+                                                      options=osp_staff_projects,
+                                                      multi=True,
+                                                      ),
+                                         html.Span(id='mod_project_user', style=dict(color='white')),
+                                         html.Br(),
+                                         html.H5('Процент выполнения:'),
+                                         dcc.Input(id="input_pers_modify",
+                                                   placeholder="Укажите процент выполнения задачи...",
+                                                   type="number",
+                                                   required=True,
+                                                   style=dict(width='100%')),
+                                         html.Span(id='mod_project_persent', style=dict(color='white')),
+                                         html.Br(),
+                                         html.H5('Описание:'),
+                                         dcc.Textarea(id="input_descr_modify",
+                                                      placeholder="Введите описание проекта...",
+                                                      required=True,
+                                                      style=dict(width='100%')),
+                                         html.Span(id='mod_project_descr', style=dict(color='white')),
+                                         html.Br(),
+                                         html.H5('Плановая дата выполнения:'),
+                                         dcc.DatePickerSingle(id='date_pr_modify',
+                                                              min_date_allowed=dt.date.today(),
+                                                              display_format='DD-MM-YYYY',
+                                                              style=dict(float='left')),
+                                         html.Span(id='modify_project_end_date', style=dict(color='white')),
+                                         html.Div([], style=dict(width='50%')),
+                                         html.Div(id='mod_project_name', style=dict(textAlign='center', color='green')),
+                                         html.Div([
+                                             html.Button("Сохранить", id='btn_save_modify',
+                                                         className='confirm_btn'),
+                                         ], style=dict(float='right', position='relative', margin='0 auto')),
+                                         html.Br(),
+                                         html.Div([
+                                         ], style=dict(float='left', position='relative', padding='20 0 0 0'))
+                                     ]),
+                                 ),
+                                 dbc.ModalFooter(
+                                     html.Div([
+                                         html.Button("Закрыть", id="btn_close_modify", className="button"),
+                                     ])
+                                 ),
+                                 ],
+                                id="modify_window",
+                                backdrop='static',
+                                size='xl'
+                            )
+                        ], style=dict(width='98%', margin='0 auto')),
+                        html.Br(),
+                        html.Div([
+                            html.H3('Задачи / проекты в работе', style=dict(color='#1959d1', fontType='bold'))
                         ]),
                         html.Div([
                             dash_table.DataTable(id='project_table',
@@ -278,11 +417,12 @@ def serve_layout():
                                                                          {'if': {'column_id': 'Название'},
                                                                           'width': '30%'}],
                                                  export_format='xlsx',
+                                                 editable=True,
                                                  )
                         ], style=dict(width='98%', margin='0 auto')),
                         html.Br(),
                         html.Div([
-                            html.H3('Выполненные задачи/проекты', style=dict(color='#1F5C0A', textType='bold'))
+                            html.H3('Выполненные задачи / проекты', style=dict(color='#1F5C0A', textType='bold'))
                         ]),
                         html.Div([
                             dash_table.DataTable(id='completed_projects',
@@ -302,7 +442,6 @@ def serve_layout():
                                                                           'textAlign': 'center', 'width': '8%'},
                                                                          {'if': {'column_id': 'Название'},
                                                                           'width': '30%'}],
-
                                                  export_format='xlsx'
                                                  )
                         ], style=dict(width='98%', margin='0 auto')),

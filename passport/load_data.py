@@ -28,7 +28,11 @@ def load_etsp_data():
     -------
         **DataFrame**
     """
-    df = pd.read_sql('''select * from etsp_data''', con=engine)
+    df = pd.read_sql("""
+            SELECT num, user, reg_date, solved_date, descr, unit, start_date, finish_date, timedelta, month_open, 
+                   month_solved, week_open, week_solved, count_task 
+            FROM etsp_data
+        """, con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -44,7 +48,11 @@ def load_sue_data():
     -------
         **DataFrame**
     """
-    df = pd.read_sql('''select * from sue_data''', con=engine)
+    df = pd.read_sql("""
+            SELECT reg_date, status, event_number, descr, plan_date, solved_date, user, timedelta, unit, start_date, 
+                   finish_date, month_open, month_solved, week_open, week_solved, count_task
+            FROM sue_data
+        """, con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -60,7 +68,11 @@ def load_osp_data():
     -------
         **DataFrame**
     """
-    df = pd.read_sql('''select * from osp_data''', con=engine)
+    df = pd.read_sql("""
+            SELECT reg_date, user, descr, plan_date, solved_date, timedelta, unit, start_date, finish_date, month_open, 
+                   month_solved, week_open, week_solved, count_task 
+            FROM osp_data
+        """, con=engine)
     df.timedelta = pd.to_timedelta(df.timedelta)
 
     return df
@@ -213,7 +225,7 @@ def count_mean_time(filtered_df):
     else:
         avg_time = f'{avg_time[0]} дн. {avg_time[1]} час. {avg_time[2]} мин.'
 
-    return '-' #avg_time
+    return '-'
 
 
 def load_inf_systems_data():
@@ -424,11 +436,11 @@ def get_months(start_month, start_year, finish_month, finish_year):
     return start_period
 
 
-def load_projects(projects_status='in_progress'):
+def load_projects(projects_status='in_progress', project_name='all'):
     """
     Синтаксис:
     ----------
-    **load_projects** (projects_status='in_progress')
+    **load_projects** (projects_status='in_progress', *args)
 
     Описание:
     ----------
@@ -443,20 +455,38 @@ def load_projects(projects_status='in_progress'):
 
         '**complete**' - загружает все завершенные проекты/задачи отдела.
 
+        '***args**' - Название проекта.
+
     Returns:
     ----------
         **DataFrame**
     """
     if projects_status == 'in_progress':
-        return pd.read_sql("""
-        select id, name, executor, persent, stage, finish_date from projects_new where persent < 100
-        """,
-                           con=engine)
+        if project_name == 'all':
+            return pd.read_sql("""
+            SELECT id, name, executor, persent, stage, finish_date 
+            FROM projects_new 
+            WHERE persent < 100
+        """, con=engine)
+        else:
+            return pd.read_sql(f"""
+            SELECT id, name, executor, persent, stage, finish_date 
+            FROM projects_new 
+            WHERE persent < 100
+                AND name ='{project_name}'
+        """, con=engine)
+
     elif projects_status == 'complete':
         return pd.read_sql("""
-        select id, name, executor, persent, stage from projects_new where persent = 100
-        """,
-                           con=engine)
+            SELECT id, name, executor, persent, stage 
+            FROM projects_new 
+            WHERE persent = 100
+        """, con=engine)
+    elif projects_status == 'all':
+        return pd.read_sql("""
+            SELECT id, name, executor, persent, stage, finish_date 
+            FROM projects_new 
+        """, con=engine)
     else:
         return pd.DataFrame(columns=['id', 'name', 'executor', 'persent', 'stage', 'finish_date'])
 
@@ -488,64 +518,6 @@ def set_differences(diff):
         style_t = {'font-size': '2em', 'color': 'red'}
         diff_t = str(diff)
     return [style_t, diff_t]
-
-
-def get_prev_filtered_df(df, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
-    """
-    Синтаксис:
-    ----------
-
-    **get_prev_filtered_df** (df, choice_type_period, start_date_user, end_date_user, choosen_month, choosen_week)
-
-    Описание:
-    ----------
-
-    Функция принимает на вход датафрейм и параметры фильтрации (тип фильтра, выбранный номер недели, месяца, даты
-    начала/окончания периода). Возвращает отфильтрованный датафрейм за период предшествующий выбранным параметрам
-    (напрмер если выбран номер месяца 2, то функция вернет отфильтрованный датафрейм за предыдцщий месяц, т.е. 1).
-
-    Параметры:
-    ----------
-        **df**: DataFrame - Датафрейм для фильтрации
-
-        **choice_type_period**: string
-            Определяет тип фильтрации. Допустимые значения:
-
-            '**m**' - фильтрация по выбранному месяцу.
-
-            '**p**' - фильтрация по произвольному периоду.
-
-            Если параметр не указан, то фильтрация осуществляется по неделям.
-
-        **start_date_user**: *str* - дата начала периода (если фильтрация по произвольному периоду (DateTimeRange))
-
-        **end_date_user**: *str* - дата окончания периода (если фильтрация по произвольному периоду (DateTimeRange))
-
-        **choosen_month**: *int* - номер выбранного месяца (если фильтрация по месяцу)
-
-        **choosen_week**: *int* - номер выбранной недели (если фильтрация осуществляется по неделям)
-
-    Returns:
-    ----------
-        **DataFrame**
-    """
-    if choice_type_period == 'm':
-        if int(choosen_month) > 1:
-            return df[df['month_open'] == (int(choosen_month) - 1)]
-        else:
-            return df[df['month_open'] == 12]
-
-    elif choice_type_period == 'p':
-        delta = dt.datetime.strptime(end_date_user, '%Y-%m-%d') - dt.datetime.strptime(start_date_user, '%Y-%m-%d')
-        prev_start_date = dt.datetime.strftime((dt.datetime.strptime(start_date_user, '%Y-%m-%d') - delta), '%Y-%m-%d')
-        prev_end_date = dt.datetime.strftime((dt.datetime.strptime(end_date_user, '%Y-%m-%d') - delta), '%Y-%m-%d')
-        return df[(df['start_date'] >= prev_start_date) & (df['start_date'] <= prev_end_date)]
-
-    else:
-        if int(choosen_week) > 1:
-            return df[df['week_open'] == (int(choosen_week) - 1)]
-        else:
-            return df[df['week_open'] == 52]
 
 
 def choosen_type(choice_type_period, start_date_user, end_date_user, choosen_month, choosen_week):
@@ -603,51 +575,6 @@ def choosen_type(choice_type_period, start_date_user, end_date_user, choosen_mon
         lw.log_writer(f'User choice "week = {choosen_week} ({get_period(current_year, choosen_week)})"')
 
     return period_choice, week_choice, month_choice
-
-
-def get_filtered_df(df, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
-    """
-    Синтаксис:
-    ----------
-    **get_filtered_df** (df, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period)
-
-    Описание:
-    ----------
-    Функция принимает на вход датафрейм и параметры фильтрации (тип фильтра, выбранный номер недели, месяца, даты
-    начала/окончания периода). Возвращает отфильтрованный датафрейм за выбранный период.
-
-    Параметры:
-    ----------
-        **df**: *DataFrame* - Датафрейм для фильтрации
-
-        **choice_type_period**: *str* - Определяет тип фильтрации. Допустимые значения:
-
-            '**m**' - фильтрация по выбранному месяцу.
-
-            '**p**' - фильтрация по произвольному периоду.
-
-            Если параметр не указан, то филттрация осуществляется по неделям.
-
-        **start_date_user**: *str* - дата начала периода (если фильтрация по произвольному периоду (DateTimeRange))
-
-        **end_date_user**: *str* - дата окончания периода (если фильтрация по произвольному периоду (DateTimeRange))
-
-        **choosen_month**: *int* - номер выбранного месяца (если фильтрация по месяцу)
-
-        **choosen_week**: *int* - номер выбранной недели (если фильтрация осуществляется по неделям)
-
-    Returns:
-    ----------
-        **DataFrame**
-    """
-    if choice_type_period == 'm':
-        return df[df['month_open'] == int(choosen_month)]
-
-    elif choice_type_period == 'p':
-        return df[(df['start_date'] >= start_date_user) & (df['start_date'] <= end_date_user)]
-
-    else:
-        return df[df['week_open'] == int(choosen_week)]
 
 
 def get_date_for_metrika_df(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
@@ -710,6 +637,42 @@ def get_date_for_metrika_df(start_date_user, end_date_user, choosen_month, choos
 
 
 def get_filtered_df_new(table_name, start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    """
+    Синтаксис:
+    ----------
+    **get_filtered_df_new** (table_name, start_date_user, end_date_user, choosen_month, choosen_week,
+    choice_type_period)
+
+    Описание:
+    ----------
+    Функция принимает на вход наименование таблицы, в которой содержаться данные по техподдержки в БД и параметры
+    фильтрации (тип фильтра, выбранный номер недели, месяца, даты начала/окончания периода). Сделает запрос к БД.
+    Возвращает отфильтрованный датафрейм за выбранный период по выбранной таблице (техподдержки).
+
+    Параметры:
+    ----------
+        **table_name**: *String* - Название таблицы в БД для фильтрации
+
+        **choice_type_period**: *str* - Определяет тип фильтрации. Допустимые значения:
+
+            '**m**' - фильтрация по выбранному месяцу.
+
+            '**p**' - фильтрация по произвольному периоду.
+
+            Если параметр не указан, то филттрация осуществляется по неделям.
+
+        **start_date_user**: *str* - дата начала периода (если фильтрация по произвольному периоду (DateTimeRange))
+
+        **end_date_user**: *str* - дата окончания периода (если фильтрация по произвольному периоду (DateTimeRange))
+
+        **choosen_month**: *int* - номер выбранного месяца (если фильтрация по месяцу)
+
+        **choosen_week**: *int* - номер выбранной недели (если фильтрация осуществляется по неделям)
+
+    Returns:
+    ----------
+        **DataFrame**
+    """
     if choice_type_period == 'm':
         df = pd.read_sql(f"""
             SELECT * 
@@ -739,6 +702,46 @@ def get_filtered_df_new(table_name, start_date_user, end_date_user, choosen_mont
 
 def get_prev_filtered_df_db(table_name, start_date_user, end_date_user, choosen_month, choosen_week,
                             choice_type_period):
+    """
+    Синтаксис:
+    ----------
+
+    **get_prev_filtered_df_db** (table_name, choice_type_period, start_date_user, end_date_user, choosen_month,
+    choosen_week)
+
+    Описание:
+    ----------
+
+    Функция принимает на вход наименование таблицы, в которой содержаться данные по техподдержки в БД и параметры
+    фильтрации (тип фильтра, выбранный номер недели, месяца, даты начала/окончания периода). Сделает запрос к БД.
+    Возвращает отфильтрованный датафрейм за период предшествующий выбранным параметрам (напрмер если выбран номер месяца
+    2, то функция вернет отфильтрованный датафрейм за предыдцщий месяц, т.е. 1).
+
+    Параметры:
+    ----------
+        **table_name**: *String* - Название таблицы в БД для фильтрации
+
+        **choice_type_period**: string
+            Определяет тип фильтрации. Допустимые значения:
+
+            '**m**' - фильтрация по выбранному месяцу.
+
+            '**p**' - фильтрация по произвольному периоду.
+
+            Если параметр не указан, то фильтрация осуществляется по неделям.
+
+        **start_date_user**: *str* - дата начала периода (если фильтрация по произвольному периоду (DateTimeRange))
+
+        **end_date_user**: *str* - дата окончания периода (если фильтрация по произвольному периоду (DateTimeRange))
+
+        **choosen_month**: *int* - номер выбранного месяца (если фильтрация по месяцу)
+
+        **choosen_week**: *int* - номер выбранной недели (если фильтрация осуществляется по неделям)
+
+    Returns:
+    ----------
+        **DataFrame**
+    """
     if choice_type_period == 'm':
         if int(choosen_month) > 1:
             df = pd.read_sql(f"""
@@ -790,6 +793,23 @@ def get_prev_filtered_df_db(table_name, start_date_user, end_date_user, choosen_
 
 
 def get_filtered_incidents_df_db(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
+    """
+    Синтаксис:
+    ----------
+
+    **get_filtered_incidents_df_db** (start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period)
+
+    Описание:
+    ---------
+
+    Функция принимает на вход параметры фильтрации (тип фильтра, выбранный номер недели, месяца, даты начала/окончания
+    периода). Сделает запрос к БД. Возвращает отфильтрованный датафрейм за выбранный период (неделя, месяц, произвольный
+    период), в случае если за выбранный период были зафиксирвоаны аварийные инциденты
+
+    Returns:
+    -------
+        **DataFrame**
+    """
     if choice_type_period == 'm':
         df = pd.read_sql(f"""
             SELECT * 
@@ -831,3 +851,26 @@ def get_filtered_incidents_df_db(start_date_user, end_date_user, choosen_month, 
                       'Пользователь', 'timedelta', 'Отдел', 'Дата', 'finish_date', 'month_open', 'month_solved',
                       'week_open', 'week_solved', 'count_task']
         return df
+
+
+def get_osp_names_projects():
+    df = pd.read_sql('staff', con=engine)
+    osp_staff = df.curr_name.to_list()
+    project_staff = []
+    for i in range(len(osp_staff)):
+        person_name = ''.join([osp_staff[i][:osp_staff[i].find(' ') + 2], '.',
+                               osp_staff[i][osp_staff[i].rfind(' ') + 1:osp_staff[i].rfind(' ') + 2], '.'])
+        project_staff.append({'label': person_name, 'value': person_name})
+    return project_staff
+
+
+def names_to_db(project_user):
+    if not project_user:
+        return None
+    else:
+        names_string = ''
+        for item in project_user:
+            print(item)
+            names_string = ''.join([names_string, '/', item])
+            print(names_string)
+        return names_string[1:]
