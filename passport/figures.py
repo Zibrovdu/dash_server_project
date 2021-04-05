@@ -55,8 +55,8 @@ def plot_support_pie_figure(etsp_filtered_df, sue_filtered_df, osp_filtered_df):
 
     Описание:
     ---------
-    Функция отвчает за построение графика (круговая диаграмма) отображающего процентное соотношение количества обращений
-    по каждой из трех теххподдержек (ЕЦП, СУЭ ФК, ОСП) за выбранный период времени
+    Функция отвечает за построение графика (круговая диаграмма) отображающего процентное соотношение количества
+    обращений по каждой из трех техподдержек (ЕЦП, СУЭ ФК, ОСП) за выбранный период времени
 
     Параметры:
     ----------
@@ -215,7 +215,7 @@ def plot_el_budget_graph(filtered_metrika_df, names_el_budget_section_dict):
 
     Описание:
     ---------
-    Функция отвчает за построение графика (гистограмма) отображающего среднюю глубину просмотра каждого подраздела
+    Функция отвечает за построение графика (гистограмма) отображающего среднюю глубину просмотра каждого подраздела
     в разделе сайта "Электронный бюджет"
 
     Параметры:
@@ -251,7 +251,7 @@ def plot_el_budget_graph_mean_time(df, names_el_budget_section_dict):
     """
     Синтаксис:
     ----------
-    **plot_el_budget_graph** (df, names_el_budget_section_dict)
+    **plot_el_budget_graph_mean_time** (df, names_el_budget_section_dict)
 
     Описание:
     ---------
@@ -332,7 +332,7 @@ def visits_gossluzba_site(filtered_metrika_df):
     """
     Синтаксис:
     ----------
-    **plot_gossluzba_graph_page_dept** (filtered_metrika_df)
+    **visits_gossluzba_site** (filtered_metrika_df)
 
     Описание:
     ---------

@@ -271,7 +271,6 @@ def serve_layout():
                                                    placeholder="Введите название задачи / проекта...",
                                                    type="text",
                                                    required=True,
-                                                   # debounce=True,
                                                    minLength=5,
                                                    style=dict(width='100%')),
                                          html.Br(),
@@ -290,7 +289,7 @@ def serve_layout():
                                                    placeholder="Укажите процент выполнения задачи...",
                                                    type="number",
                                                    required=True,
-                                                   # debounce=True,
+                                                   value=0,
                                                    style=dict(width='100%')),
                                          html.Span(id='fill_project_persent', style=dict(color="#ebecf1"), hidden=True),
                                          html.Br(),
@@ -416,6 +415,12 @@ def serve_layout():
                                                                           'textAlign': 'center', 'width': '8%'},
                                                                          {'if': {'column_id': 'Название'},
                                                                           'width': '30%'}],
+                                                 style_data_conditional=[{'if': {'filter_query': f'{{'
+                                                                                                 f'Процент выполнения}}'
+                                                                                                 f'= {0}',
+                                                                                 },
+                                                                          'backgroundColor': '#ffe0db'
+                                                                          }, ],
                                                  export_format='xlsx',
                                                  editable=True,
                                                  )
