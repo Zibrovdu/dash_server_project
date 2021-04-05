@@ -419,7 +419,7 @@ def serve_layout():
                                                                                                  f'Процент выполнения}}'
                                                                                                  f'= {0}',
                                                                                  },
-                                                                          'backgroundColor': '#ffe0db'
+                                                                          'backgroundColor': '#BFB9CF'
                                                                           }, ],
                                                  export_format='xlsx',
                                                  editable=True,
