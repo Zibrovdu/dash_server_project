@@ -103,7 +103,7 @@ def serve_layout():
                                                                                                  finish_month)[1]),
                                                     start_date=dt.date(ld.end_year, ld.end_month, ld.end_day),
                                                     end_date=dt.date(ld.current_year, ld.current_month, ld.current_day),
-                                                    updatemode='birthdate',
+                                                    updatemode='bothdates',
                                                     style=dict(background='#b1d5fa'),
                                                     clearable=False
                                                     )])], className='bblock',

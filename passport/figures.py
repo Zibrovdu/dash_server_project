@@ -189,12 +189,12 @@ def fig_inf_systems(inf_systems_data, on):
            **Figure**
        """
     fig_inf_sys = go.Figure()
-    for i in range(len(inf_systems_data)):
+    for num in range(len(inf_systems_data)):
         fig_inf_sys.add_trace(go.Bar(y=inf_systems_data.columns,
-                                     x=inf_systems_data.iloc[i],
-                                     name=inf_systems_data.index[i],
+                                     x=inf_systems_data.iloc[num],
+                                     name=inf_systems_data.index[num],
                                      orientation='h',
-                                     text=inf_systems_data.iloc[i],
+                                     text=inf_systems_data.iloc[num],
                                      textposition='inside'))
         fig_inf_sys.update_layout(barmode='stack',
                                   height=1000,
