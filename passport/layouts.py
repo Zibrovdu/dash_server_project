@@ -262,7 +262,7 @@ def serve_layout():
                             ], className='add_mod_div'),
 
                             dbc.Modal(
-                                [dbc.ModalHeader("Добавление нового проекта"),
+                                [dbc.ModalHeader("Добавление нового проекта (все поля обязательны к заполнению)"),
                                  dbc.ModalBody(
                                      html.Div([
                                          html.Span(id="example-output", style=dict(color="#ebecf1"), hidden=True),
@@ -297,7 +297,7 @@ def serve_layout():
                                          dcc.Textarea(id="input_descr",
                                                       placeholder="Введите описание задачи / проекта...",
                                                       required=True,
-                                                      minLength=20,
+                                                      minLength=10,
                                                       style=dict(width='100%')),
                                          html.Span(id='fill_project_descr', style=dict(color="#ebecf1"), hidden=True),
                                          html.Br(),
@@ -401,6 +401,8 @@ def serve_layout():
                                                  data=projects_df.to_dict('records'),
                                                  style_as_list_view=True,
                                                  cell_selectable=False,
+                                                 filter_action="native",
+                                                 sort_action='native',
                                                  style_table=dict(overflowX='auto'),
                                                  style_data=dict(whiteSpace='normal', height='auto',
                                                                  background='#F5F5DC'),
@@ -414,7 +416,14 @@ def serve_layout():
                                                                          {'if': {'column_id': 'Исполнитель'},
                                                                           'textAlign': 'center', 'width': '8%'},
                                                                          {'if': {'column_id': 'Название'},
-                                                                          'width': '30%'}],
+                                                                          'width': '30%'},
+                                                                         {'if': {'column_id': 'Процент выполнения'},
+                                                                          'width': '8%'},
+                                                                         {'if': {'column_id': 'Срок исполнения'},
+                                                                          'width': '7%'},
+                                                                         {'if': {'column_id': 'Номер'},
+                                                                          'width': '3%'}
+                                                                         ],
                                                  style_data_conditional=[{'if': {'filter_query': f'{{'
                                                                                                  f'Процент выполнения}}'
                                                                                                  f'= {0}',
