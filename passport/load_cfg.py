@@ -15,3 +15,9 @@ db_dialect = cfg_parser['connect']['dialect']
 etsp_table_name = cfg_parser['table_names']['etsp_table']
 sue_table_name = cfg_parser['table_names']['sue_table']
 osp_table_name = cfg_parser['table_names']['osp_table']
+
+con_mail_server = [cfg_parser['mail']['server'], cfg_parser['mail']['user'], cfg_parser['mail']['password']]
+
+
+new_task_subject = 'На Вас назначена задача / проект'
+exist_task_subject = 'Внесены изменеия по задаче / проекту'

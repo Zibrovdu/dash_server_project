@@ -1,8 +1,8 @@
 import dash
 import dash_bootstrap_components as dbc
-from passport.layouts import serve_layout
-from passport.callbacks import register_callbacks
 
+from passport.callbacks import register_callbacks
+from passport.layouts import serve_layout
 
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP],

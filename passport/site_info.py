@@ -1,26 +1,21 @@
-import requests
 import pandas as pd
+import requests
+
 import passport.load_cfg as cfg
 import passport.log_writer as lw
 
+names_el_budget_dict = {'podklyuchenie-k-sisteme': 'Подключение к системе',
+                        'podsistema-ucheta-i-otchetnosti': 'Подсистема учета и отчетности',
+                        'servis-upravleniya-komandirovaniem': 'Сервис управления командированием',
+                        'podsistema-upravleniya-oplatoy-truda': 'Подсистема управления оплатой труда',
+                        'tekhnicheskaya-podderzhka-gis-elektronnogo-byudzheta': 'Тех. поддержка ГИИС "Электронный '
+                                                                                'бюджет"',
+                        'podsistema-ucheta-nefinansovykh-aktivov': 'Подсистема упр. нефинансовыми активами'}
 
-class NamesElBudgetPages:
-    names_el_budget_section_dict = {'podklyuchenie-k-sisteme': 'Подключение к системе',
-                                    'podsistema-ucheta-i-otchetnosti': 'Подсистема учета и отчетности',
-                                    'servis-upravleniya-komandirovaniem': 'Сервис управления командированием',
-                                    'podsistema-upravleniya-oplatoy-truda': 'Подсистема управления оплатой труда',
-                                    'tekhnicheskaya-podderzhka-gis-elektronnogo-byudzheta': 'Тех. поддержка ГИИС'
-                                                                                            '"Электронный бюджет"',
-                                    "podsistema-ucheta-nefinansovykh-aktivov": 'Подсистема упр. нефинансовыми '
-                                                                               'активами'}
-
-
-class NamesGossluzbaPages:
-    names_gossluzba_dict = {'konkurs-na-zameshchenie-vakantnykh-dolzhnostey': 'Конкурс на замещение вакантных '
-                                                                              'должностей',
-                            'vakansii': 'Вакансии',
-                            'gosudarstvennaya-sluzhba-v-mezhregionalnom-bukhgalterskom-ufk': 'Государственная служба в '
-                                                                                             'МБУ ФК'}
+names_gossluzba_dict = {'konkurs-na-zameshchenie-vakantnykh-dolzhnostey': 'Конкурс на замещение вакантных должностей',
+                        'vakansii': 'Вакансии',
+                        'gosudarstvennaya-sluzhba-v-mezhregionalnom-bukhgalterskom-ufk': 'Государственная служба в МБУ '
+                                                                                         'ФК'}
 
 
 def get_site_info(start_date, end_date):
@@ -59,11 +54,13 @@ def get_site_info(start_date, end_date):
         'filters': "ym:s:startURLPathLevel1=='https://mbufk.roskazna.gov.ru/'"
     }
 
-    response = requests.get('https://api-metrika.yandex.net/stat/v1/data', params=sources_sites, headers=headers)
-    lw.log_writer(f"server response code {response.status_code}")
+    response = requests.get('https://api-metrika.yandex.net/stat/v1/data',
+                            params=sources_sites,
+                            headers=headers)
+    lw.log_writer(log_msg=f"server response code {response.status_code}")
 
     metrika_data = response.json()
-    lw.log_writer(f"Data load successfully, total row loaded: {metrika_data['total_rows']}")
+    lw.log_writer(log_msg=f"Data load successfully, total row loaded: {metrika_data['total_rows']}")
 
     if response.status_code != 200 or metrika_data['total_rows'] == 0:
         metrika_df = pd.DataFrame(
@@ -90,11 +87,11 @@ def get_site_info(start_date, end_date):
     return metrika_df
 
 
-def get_data_visits_graph(metrika_df):
+def get_data_visits_graph(df):
     """
     Синтаксис:
     ----------
-    **get_data_visits_graph** (metrika_df)
+    **get_data_visits_graph** (df)
 
     Описание:
     ---------
@@ -103,30 +100,30 @@ def get_data_visits_graph(metrika_df):
 
     Параметры:
     ----------
-        **metrika_df**: *DataFrame* - датафрейм полученный из API Яндекс.Метрики
+        **df**: *DataFrame* - датафрейм полученный из API Яндекс.Метрики
 
     Returns:
     ----------
         **DataFrame**
     """
-    metrika_df.columns = ('date', 'level1', 'level2', 'level3', 'level4',
-                          'startURL', 'visits', 'users', 'pageviews', 'bounceRate', 'pageDepth',
-                          'avgVisitDurationSeconds')
+    df.columns = ('date', 'level1', 'level2', 'level3', 'level4',
+                  'startURL', 'visits', 'users', 'pageviews', 'bounceRate', 'pageDepth',
+                  'avgVisitDurationSeconds')
 
-    metrika_df = metrika_df
-    metrika_df['level4'] = metrika_df['level4'].fillna('')
+    df = df
+    df['level4'] = df['level4'].fillna('')
     for col in ['visits', 'users', 'pageviews']:
-        metrika_df[col] = metrika_df[col].astype(int)
+        df[col] = df[col].astype(int)
 
     molod_sovet_df = pd.DataFrame(
-        metrika_df[metrika_df['level4'].str.contains('molodezhnyy-sovet')].groupby(['level4'], as_index=False)[
+        df[df['level4'].str.contains('molodezhnyy-sovet')].groupby(['level4'], as_index=False)[
             ['visits', 'users', 'pageviews', 'bounceRate', 'pageDepth', 'avgVisitDurationSeconds']].sum().rename(
             columns={'level4': 'level2'}))
-    metrika_df = pd.DataFrame(metrika_df.groupby(['level2'], as_index=False)[
-                                  ['visits', 'users', 'pageviews', 'bounceRate', 'pageDepth',
-                                   'avgVisitDurationSeconds']].sum())
-    metrika_df = metrika_df.append(molod_sovet_df).reset_index()
-    metrika_df.drop('index', axis=1, inplace=True)
+    df = pd.DataFrame(df.groupby(['level2'], as_index=False)[
+                          ['visits', 'users', 'pageviews', 'bounceRate', 'pageDepth',
+                           'avgVisitDurationSeconds']].sum())
+    df = df.append(molod_sovet_df).reset_index()
+    df.drop('index', axis=1, inplace=True)
 
     names_dict = {'molodezhnyy-sovet/': 'Молодежный совет', 'elektronnyy-byudzhet/': 'Электронный бюджет',
                   'o-kaznachejstve/': 'О Межрегиональном бухгалтерском УФК', 'inaya-deyatelnost/': 'Иная деятельность',
@@ -135,22 +132,22 @@ def get_data_visits_graph(metrika_df):
                   'poisk/': 'Поиск', 'priem-obrashhenij/': 'Прием обращений'}
 
     for search_str, name in names_dict.items():
-        mask = metrika_df[metrika_df['level2'].str.contains(search_str)].index
-        metrika_df.loc[mask, 'level2'] = name
+        mask = df[df['level2'].str.contains(search_str)].index
+        df.loc[mask, 'level2'] = name
 
     site_sections = ['Электронный бюджет', 'О Межрегиональном бухгалтерском УФК', 'Иная деятельность', 'Документы',
                      'Прием обращений']
-    mask = metrika_df['level2'].isin(site_sections)
-    metrika_df = metrika_df.loc[mask].sort_values('visits', ascending=True)
+    mask = df['level2'].isin(site_sections)
+    df = df.loc[mask].sort_values('visits', ascending=True)
 
-    return metrika_df
+    return df
 
 
-def get_el_budget_data(metrika_df, names_dict):
+def get_el_budget_data(df, names_el_budget):
     """
     Синтаксис:
     ----------
-    **get_el_budget_data** (metrika_df, names_dict)
+    **get_el_budget_data** (df, names_el_budget)
 
     Описание:
     ---------
@@ -159,29 +156,29 @@ def get_el_budget_data(metrika_df, names_dict):
 
     Параметры:
     ----------
-        **metrika_df**: *DataFrame* - датафрейм полученный из API Яндекс.Метрики
+        **df**: *DataFrame* - датафрейм полученный из API Яндекс.Метрики
 
-        **names_dict**: *dict*  словарь, в котором ключами являются часть пути, по которому расположена страница
+        **names_el_budget**: *dict*  словарь, в котором ключами являются часть пути, по которому расположена страница
         (3 уровень), а значением - название раздела на русском языке
 
     Returns:
     ----------
         **DataFrame**
     """
-    metrika_df['level3'] = metrika_df['level3'].fillna('')
-    for search_str, name in names_dict.items():
-        mask = metrika_df[metrika_df['level3'].str.contains(search_str)].index
-        metrika_df.loc[mask, 'level3'] = name
-    metrika_df = metrika_df[metrika_df['level3'].isin(names_dict.values())]
+    df['level3'] = df['level3'].fillna('')
+    for search_str, name in names_el_budget.items():
+        mask = df[df['level3'].str.contains(search_str)].index
+        df.loc[mask, 'level3'] = name
+    df = df[df['level3'].isin(names_el_budget.values())]
 
-    return metrika_df
+    return df
 
 
-def get_gossluzba_data(metrika_df, names_gossluzba_dict):
+def get_gossluzba_data(df, names_gossluzba):
     """
     Синтаксис:
     ----------
-    **get_gossluzba_data** (metrika_df, names_gossluzba_dict)
+    **get_gossluzba_data** (df, names_gossluzba)
 
     Описание:
     ---------
@@ -190,20 +187,20 @@ def get_gossluzba_data(metrika_df, names_gossluzba_dict):
 
     Параметры:
     ----------
-        **metrika_df**: *DataFrame* - датафрейм полученный из API Яндекс.Метрики
+        **df**: *DataFrame* - датафрейм полученный из API Яндекс.Метрики
 
-        **names_dict**: *dict* - словарь, в котором ключами являются часть пути по которому расположена страница
+        **names_gossluzba**: *dict* - словарь, в котором ключами являются часть пути по которому расположена страница
         (3 уровень), а значением - название раздела на русском языке
 
     Returns:
     ----------
         **DataFrame**
     """
-    mask = metrika_df[metrika_df.level3 == 'https://mbufk.roskazna.gov.ru/inaya-deyatelnost/'
-                                           'gosudarstvennaya-sluzhba-v-mezhregionalnom-bukhgalterskom-ufk/'].index
-    metrika_df = metrika_df.loc[mask]
-    for search_str, name in names_gossluzba_dict.items():
-        mask = metrika_df[metrika_df['startURL'].str.contains(search_str)].index
-        metrika_df.loc[mask, 'startURL'] = name
+    mask = df[df.level3 == 'https://mbufk.roskazna.gov.ru/inaya-deyatelnost/gosudarstvennaya-sluzhba-v' 
+                           '-mezhregionalnom-bukhgalterskom-ufk/'].index
+    df = df.loc[mask]
+    for search_str, name in names_gossluzba.items():
+        mask = df[df['startURL'].str.contains(search_str)].index
+        df.loc[mask, 'startURL'] = name
 
-    return metrika_df
+    return df
