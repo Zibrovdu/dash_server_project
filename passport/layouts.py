@@ -14,6 +14,7 @@ inf_systems_data = ld.load_inf_systems_data()
 
 
 def serve_layout():
+    curr_date = dt.date(ld.current_year, ld.current_month, ld.current_day)
     etsp_df = ld.load_etsp_data()
     etsp_top_user_df = ld.top_user(df=etsp_df)
 
@@ -81,7 +82,8 @@ def serve_layout():
         ], className="banner"),
         html.Div([
             html.Div([
-                html.Div([html.Div([html.Label("Выберите период: ")], className='wrapper-dropdown-4')],
+                html.Div([html.Div([html.Label("Выберите период: ")],
+                                   className='wrapper-dropdown-4')],
                          className='bblock'),
                 html.Div([html.Div([dcc.Dropdown(id='choice_type',
                                                  options=choice_type,
@@ -570,7 +572,10 @@ def serve_layout():
                                                                       {'if': {'filter_query': f'{{Процент '
                                                                                               f'выполнения}} = {0}', },
                                                                        'backgroundColor': '#BFB9CF'
-                                                                       }, ],
+                                                                       },
+                                                                      {'if': {'filter_query': f'{{Срок исполнения}} < '
+                                                                                              f'{curr_date}'},
+                                                                       'backgroundColor': '#f5a3b7'}],
                                                                   export_format='xlsx',
                                                                   editable=True,
                                                                   )
@@ -603,7 +608,11 @@ def serve_layout():
                                                                       {'if': {'column_id': 'Исполнитель'},
                                                                        'textAlign': 'center', 'width': '8%'},
                                                                       {'if': {'column_id': 'Название'},
-                                                                       'width': '30%'}],
+                                                                       'width': '30%'},
+                                                                      {'if': {'column_id': 'Дата выполнения'},
+                                                                       'textAlign': 'center'},
+                                                                      {'if': {'column_id': 'Длительность'},
+                                                                       'textAlign': 'center'}],
                                                                   export_format='xlsx'
                                                                   )
                                          ], style=dict(width='98%',
