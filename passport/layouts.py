@@ -278,8 +278,14 @@ def serve_layout():
                                                                      backgroundColor='#e8edff', )
                                                       ], rowSpan=2),
                                          ]),
-                                     ], className='table_budget')
-                                 ], style=dict(height='165px')),
+                                     ], className='table_budget'),
+                                 ], style=dict(height='165px', width='50%', display='inline-block')),
+                                 html.Div([
+                                     html.Br(),
+                                     html.Br(),
+
+                                     dcc.Link('Полномочия и роли', href='http://192.168.1.15:8060', target='blank', className='s7')
+                                 ], style=dict(height='165px', width='40%', display='inline-block', verticalAlign='top', textAlign='center')),
                                  html.Div([
                                      daq.BooleanSwitch(
                                          id='leg_show',
