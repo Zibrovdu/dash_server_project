@@ -20,4 +20,4 @@ con_mail_server = [cfg_parser['mail']['server'], cfg_parser['mail']['user'], cfg
 
 
 new_task_subject = 'На Вас назначена задача / проект'
-exist_task_subject = 'Внесены изменеия по задаче / проекту'
+exist_task_subject = 'Внесены изменения по задаче / проекту'

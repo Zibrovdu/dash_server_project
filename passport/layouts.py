@@ -56,14 +56,16 @@ def serve_layout():
                             'Глубина просмотра': 'Количество страниц, просмотренных посетителем во время визита.',
                             'Время на сайте': 'Средняя продолжительность визита в минутах и секундах.'}]
 
-    projects_df = ld.load_projects()
+    projects_df = ld.load_projects(projects_status='in_progress',
+                                   project_name='all')
     projects_df['id'] = pd.Series([x for x in range(1, len(projects_df) + 1)])
     projects_df = projects_df[['id', 'name', 'executor', 'persent', 'stage', 'plan_date']]
     projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание', 'Срок исполнения']
 
     modify_projects_dcc = [{'label': i, 'value': i} for i in projects_df['Название']]
 
-    complete_projects_df = ld.load_projects(projects_status='complete')
+    complete_projects_df = ld.load_projects(projects_status='complete',
+                                            project_name='all')
     complete_projects_df['id'] = pd.Series([x for x in range(1, len(complete_projects_df) + 1)])
     complete_projects_df = complete_projects_df[['id', 'name', 'executor', 'persent', 'stage', 'fact_date', 'duration']]
     complete_projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание',
@@ -216,8 +218,7 @@ def serve_layout():
                                          ]),
                                          html.Br(),
                                          html.Div([html.H3('ТОП-5 пользователей')],
-                                                  style=dict(color='#222780',
-                                                             fontType='bold')),
+                                                  className='div_top_user'),
                                          html.Div([
                                              html.Div([html.H4('ЕЦП')],
                                                       className='line_block',
@@ -279,19 +280,15 @@ def serve_layout():
                                                       ], rowSpan=2),
                                          ]),
                                      ], className='table_budget'),
-                                 ], style=dict(height='165px', width='50%', display='inline-block')),
+                                 ], className='div_table_budget'),
                                  html.Div([
                                      html.Br(),
                                      html.Br(),
                                      dcc.Link('Полномочия и роли',
                                               href='http://192.168.1.15:8060',
                                               target='blank',
-                                              className='s7')
-                                 ], style=dict(height='165px',
-                                               width='40%',
-                                               display='inline-block',
-                                               verticalAlign='top',
-                                               textAlign='center')),
+                                              className='link_bounds')
+                                 ], className='div_bounds'),
                                  html.Div([
                                      daq.BooleanSwitch(
                                          id='leg_show',
@@ -320,9 +317,7 @@ def serve_layout():
                                                                                 overflow='hidden',
                                                                                 textOverflow='ellipsis',
                                                                                 maxWidth=0))],
-                                          style=dict(width='90%',
-                                                     padding='0 5%',
-                                                     fontSize='2em')),
+                                          className='div_site_stat'),
                                  html.Div([html.H3('Рейтинг посещаемости разделов сайта',
                                                    style=dict(padding='20px'))]),
                                  html.Div([dcc.Graph(id='site_top_fig')]),
@@ -501,7 +496,6 @@ def serve_layout():
                                                                     style=dict(color='white')),
                                                           html.Br(),
                                                           html.Br(),
-                                                          # html.Div([], style=dict(width='50%')),
                                                           html.H5('Фактическая дата выполнения:'),
                                                           dcc.DatePickerSingle(id='fact_date_pr_modify',
                                                                                display_format='DD-MM-YYYY',
@@ -517,9 +511,7 @@ def serve_layout():
                                                               html.Button("Сохранить",
                                                                           id='btn_save_modify',
                                                                           className='confirm_btn'),
-                                                          ], style=dict(float='right',
-                                                                        position='relative',
-                                                                        margin='0 auto')),
+                                                          ], className='div_btn_save_modify'),
                                                           html.Br(),
                                                           html.Div([
                                                           ], style=dict(float='left',
@@ -544,8 +536,7 @@ def serve_layout():
                                          html.Br(),
                                          html.Div([
                                              html.H3('Задачи / проекты в работе',
-                                                     style=dict(color='#1959d1',
-                                                                fontType='bold'))
+                                                     className='H3_work_projects')
                                          ]),
                                          html.Div([
                                              dash_table.DataTable(id='project_table',
@@ -591,13 +582,11 @@ def serve_layout():
                                                                   export_format='xlsx',
                                                                   editable=True,
                                                                   )
-                                         ], style=dict(width='98%',
-                                                       margin='0 auto')),
+                                         ], className='div_project_table'),
                                          html.Br(),
                                          html.Div([
                                              html.H3('Выполненные задачи / проекты',
-                                                     style=dict(color='#1F5C0A',
-                                                                textType='bold'))
+                                                     className='H3_complete_projects')
                                          ]),
                                          html.Div([
                                              dash_table.DataTable(id='completed_projects',
@@ -627,8 +616,7 @@ def serve_layout():
                                                                        'textAlign': 'center'}],
                                                                   export_format='xlsx'
                                                                   )
-                                         ], style=dict(width='98%',
-                                                       margin='0 auto')),
+                                         ], className='div_project_table'),
                                          html.Br(),
                                      ], selected_style=tab_selected_style),  # tab projects
                          ], colors=dict(border='#ebecf1',
