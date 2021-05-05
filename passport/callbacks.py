@@ -9,7 +9,7 @@ import passport.load_data as ld
 import passport.log_writer as lw
 import passport.site_info as si
 import passport.load_cfg as lc
-from passport.layouts import inf_systems_data
+from passport.figures import inf_sys_bar, colors_inf_system
 
 
 def register_callbacks(app):
@@ -29,14 +29,6 @@ def register_callbacks(app):
         project_descr = str(project_df[project_df.id == int(value)]['stage'][int(value) - 1])
         project_stat_value = str(project_df[project_df.id == int(value)]['status'][int(value) - 1])
         return name, executor, persent, project_descr, project_stat_value
-
-    @app.callback(
-        Output("inf_systems", "figure"),
-        [Input("leg_show", "on")])
-    def modify_legend(switch):
-        fig_inf_systems = pf.fig_inf_systems(inf_systems_data=inf_systems_data,
-                                             legend_sw=switch)
-        return fig_inf_systems
 
     @app.callback(
         Output('period_choice', 'disabled'),
@@ -450,3 +442,14 @@ def register_callbacks(app):
                 lw.log_writer(log_msg='При обновлении информации произошел сбой')
                 lw.log_writer(log_msg=str(row_modify))
                 return 'При обновлении информации произошел сбой', " "
+
+    @app.callback(
+        Output('fig_unit_inf_sys', 'figure'),
+        Input('unit_choose_inf_sys', 'value'))
+    def upd_figure(value):
+        inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
+        fig = inf_sys_bar(df=inf_systems_df,
+                          colors=colors_inf_system,
+                          value=value)
+
+        return fig

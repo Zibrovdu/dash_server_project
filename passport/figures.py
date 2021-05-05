@@ -2,6 +2,8 @@ import datetime as dt
 
 import plotly.graph_objects as go
 
+colors_inf_system = ['#5d61a2', '#93cdd1', '#a7d0b8', '#dcdcd7', '#d598a0', '#760043', '#c4b052', '#bb4e51', '#c26ca9',
+          '#0b7fab', '#f4d75e', '#e9723d']
 
 def plot_figure_support(first_tp_count_tasks, second_tp_count_tasks, third_tp_count_tasks):
     """
@@ -392,4 +394,51 @@ def visits_gossluzba_site(df):
                       paper_bgcolor='#ebecf1',
                       plot_bgcolor='#ebecf1',
                       title_xref='paper')
+    return fig
+
+
+def fig_total(df, colors):
+
+    fig = go.Figure()
+    for i in range(len(df.columns)):
+        fig.add_trace(go.Bar(x=[df.columns[i]],
+                             y=[df[df.columns[i]].sum()],
+                             name=df.columns[i],
+                             marker_color=colors[i],
+                             text=str(df[df.columns[i]].sum()),
+                             textposition='inside'))
+        fig.update_layout(barmode='stack',
+                          # height=1000,
+                          legend_xanchor='right',
+                          paper_bgcolor='#ebecf1',
+                          plot_bgcolor='#ebecf1',
+                          showlegend=False)
+    return fig
+
+
+def inf_sys_heatmap(df):
+    fig_heatmap = go.Figure(data=go.Heatmap(
+        z=[df.loc[i].to_list() for i in df.index],
+        y=df.index,
+        x=df.columns))
+    fig_heatmap.update_layout(height=700,
+                              legend_xanchor='right',
+                              paper_bgcolor='#ebecf1',
+                              plot_bgcolor='#ebecf1')
+    return fig_heatmap
+
+
+def inf_sys_bar(df, colors, value):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=df.columns,
+                         y=df.loc[value],
+                         marker_color=colors,
+                         text=df.loc[value]))
+    fig.update_traces(textposition='auto')
+    fig.update_layout(barmode='stack',
+                      # height=1000,
+                      legend_xanchor='right',
+                      paper_bgcolor='#ebecf1',
+                      plot_bgcolor='#ebecf1',
+                      showlegend=False)
     return fig

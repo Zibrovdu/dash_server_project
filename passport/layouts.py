@@ -9,8 +9,7 @@ import dash_table
 import pandas as pd
 
 import passport.load_data as ld
-
-inf_systems_data = ld.load_inf_systems_data()
+from passport.figures import fig_total, colors_inf_system, inf_sys_heatmap
 
 
 def serve_layout():
@@ -72,6 +71,9 @@ def serve_layout():
                                     'Дата выполнения', 'Длительность']
 
     osp_staff_projects = ld.get_osp_names_projects()
+
+    inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
+    unit_names = [{'label': i, 'value': i} for i in inf_systems_df.index]
 
     layout = html.Div([
         dcc.Location(id='url',
@@ -274,7 +276,7 @@ def serve_layout():
                                          ]),
                                          html.Tr([
                                              html.Td([daq.LEDDisplay(id='total_tasks',
-                                                                     value=254,
+                                                                     value=ld.count_employees(conn_string=ld.engine),
                                                                      color='#222780',
                                                                      backgroundColor='#e8edff', )
                                                       ], rowSpan=2),
@@ -285,20 +287,29 @@ def serve_layout():
                                      html.Br(),
                                      html.Br(),
                                      dcc.Link('Полномочия и роли',
-                                              href='http://192.168.1.15:8060',
+                                              href='http://10.201.76.42/',
                                               target='blank',
                                               className='link_bounds')
                                  ], className='div_bounds'),
+                                 html.Br(),
+                                 html.Br(),
                                  html.Div([
-                                     daq.BooleanSwitch(
-                                         id='leg_show',
-                                         label="Легенда",
-                                         labelPosition="top",
-                                         color='#1959d1',
-                                         on=False
-                                     ),
-                                 ], style=dict(width='15%')),
-                                 html.Div([dcc.Graph(id='inf_systems')], style=dict(background='#ebecf1'))
+                                     html.H3('Количество доступов к подсистемам в разрезе отдела'),
+                                     html.Br(),
+                                     html.Br(),
+                                     dcc.Dropdown(id='unit_choose_inf_sys',
+                                                  options=unit_names,
+                                                  value=unit_names[0]['value'],
+                                                  className="dropdown_choose_unit_inf_sys"),
+                                     dcc.Graph(id='fig_unit_inf_sys'),
+                                     html.H3('Общее количество доступов к подсистемам в разрезе подсистем'),
+                                     dcc.Graph(id='total',
+                                               figure=fig_total(df=inf_systems_df,
+                                                                colors=colors_inf_system)),
+                                     html.H3('Тепловая карта доступов к подсистемам в разрезе отделов'),
+                                     dcc.Graph(id='3',
+                                               figure=inf_sys_heatmap(df=inf_systems_df))
+                                 ], style=dict(background='#ebecf1'))
                              ], selected_style=tab_selected_style),  # tab tech
                              dcc.Tab(label='Сайт', value='s', children=[
                                  html.Br(),

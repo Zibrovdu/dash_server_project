@@ -285,7 +285,7 @@ media screen and (max-width: 650px) {
     width: 40%;
     display: inline-block;
     vertical-align: top;
-    text-align: center;
+    text-align: right;
 }
 
 .div_site_stat {
@@ -318,4 +318,9 @@ media screen and (max-width: 650px) {
 .H3_complete_projects {
     color: #1F5C0A;
     font-weight: bold;
+}
+
+.dropdown_choose_unit_inf_sys {
+    width: 62%;
+    padding: 10px;
 }

@@ -118,7 +118,8 @@ def top_user(df):
         **DataFrame**
     """
     top_user_df = df[(df.unit != 'Отдел сопровождения пользователей') & (df.unit != 'ЦОКР') & (
-            df.user != 'Кондрашова Ирина Сергеевна') & (df.unit != '19. Отдел сопровождения пользователей')]
+            df.user != 'Кондрашова Ирина Сергеевна') & (df.unit != '19. Отдел сопровождения пользователей') & (
+            df.user != 'Вельмякин Николай Валерьевич')]
     top_user_df = pd.DataFrame(top_user_df.groupby('user')['count_task'].sum().sort_values(ascending=False).head()
                                .reset_index()).rename(columns={'user': 'Пользователь', 'count_task': 'Обращения'})
     return top_user_df
@@ -252,7 +253,7 @@ def count_mean_time(filtered_df):
     else:
         avg_time = f'{avg_time[0]} дн. {avg_time[1]} час. {avg_time[2]} мин.'
 
-    return avg_time
+    return '-'
 
 
 def load_inf_systems_data():
@@ -260,7 +261,7 @@ def load_inf_systems_data():
     Синтаксис:
     ----------
 
-    **load_inf_systems_data** ()
+    **load_inf_sys_data** ()
 
     Описание:
     ---------
@@ -1038,3 +1039,19 @@ def count_project_time(start_date, fact_date):
         return (fact_date - start_date).days
     else:
         return 0
+
+
+def count_employees(conn_string):
+    df = pd.read_sql('inf_systems', con=conn_string)
+    employees_count = df[df.correct_name.notna()].correct_name.count()
+
+    return employees_count
+
+
+def load_inf_sys_data(conn_string):
+    df = pd.read_sql('inf_systems', con=conn_string)
+    df = df.groupby(['curr_unit']).count()
+    df.drop(['№ П/П', 'ФИО СОТРУДНИКОВ МБУ', 'index', 'curr_name', 'curr_descr', 'status', 'correct_name', 'is_true'],
+            axis=1, inplace=True)
+
+    return df
