@@ -9,7 +9,7 @@ import passport.load_data as ld
 import passport.log_writer as lw
 import passport.site_info as si
 import passport.load_cfg as lc
-from passport.figures import inf_sys_bar, colors_inf_system
+from passport.figures import inf_sys_bar, colors_inf_system, inf_sys_heatmap
 
 
 def register_callbacks(app):
@@ -453,3 +453,25 @@ def register_callbacks(app):
                           value=value)
 
         return fig
+
+    # @app.callback(
+    #     Output('3', 'figure'),
+    #     Input('heatmap_colorscales', 'value'))
+    # def change_colorscales_heatmap(value):
+    #     inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
+    #     figure = inf_sys_heatmap(df=inf_systems_df, value=value)
+    #     return figure
+
+    @app.callback(
+        Output('3', 'figure'),
+        Input('reverse_colorscales', 'on'),
+        Input('heatmap_colorscales', 'value'))
+    def reverse_colors(on, value):
+        if on:
+            value_r = value + '_r'
+            inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
+            figure = inf_sys_heatmap(df=inf_systems_df, value=value_r)
+        else:
+            inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
+            figure = inf_sys_heatmap(df=inf_systems_df, value=value)
+        return figure

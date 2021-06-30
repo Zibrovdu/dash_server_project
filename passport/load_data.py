@@ -253,7 +253,7 @@ def count_mean_time(filtered_df):
     else:
         avg_time = f'{avg_time[0]} дн. {avg_time[1]} час. {avg_time[2]} мин.'
 
-    return '-'
+    return avg_time
 
 
 def load_inf_systems_data():
@@ -1055,3 +1055,11 @@ def load_inf_sys_data(conn_string):
             axis=1, inplace=True)
 
     return df
+
+
+def read_history_data():
+    history_data = ''
+    with open('assets/history.txt', 'r', encoding="utf8") as history_text_file:
+        for line in history_text_file:
+            history_data += line
+        return history_data

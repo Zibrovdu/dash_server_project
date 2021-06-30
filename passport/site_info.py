@@ -53,6 +53,7 @@ def get_site_info(start_date, end_date):
         'limit': 10000,
         'filters': "ym:s:startURLPathLevel1=='https://mbufk.roskazna.gov.ru/'"
     }
+    lw.log_writer(log_msg=f"server response code {sources_sites}")
 
     response = requests.get('https://api-metrika.yandex.net/stat/v1/data',
                             params=sources_sites,

@@ -15,6 +15,7 @@ from passport.figures import fig_total, colors_inf_system, inf_sys_heatmap
 def serve_layout():
     curr_date = dt.date(ld.current_year, ld.current_month, ld.current_day)
     etsp_df = ld.load_etsp_data()
+
     etsp_top_user_df = ld.top_user(df=etsp_df)
 
     sue_df = ld.load_sue_data()
@@ -75,6 +76,21 @@ def serve_layout():
     inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
     unit_names = [{'label': i, 'value': i} for i in inf_systems_df.index]
 
+    colors = ['aggrnyl', 'agsunset', 'algae', 'amp', 'armyrose', 'balance', 'blackbody', 'bluered', 'blues', 'blugrn',
+              'bluyl', 'brbg', 'brwnyl', 'bugn', 'bupu', 'burg', 'burgyl', 'cividis', 'curl', 'darkmint', 'deep',
+              'delta', 'dense', 'earth', 'edge', 'electric', 'emrld', 'fall', 'geyser', 'gnbu', 'gray', 'greens',
+              'greys', 'haline', 'hot', 'hsv', 'ice', 'icefire', 'inferno', 'jet', 'magenta', 'magma', 'matter', 'mint',
+              'mrybm', 'mygbm', 'oranges', 'orrd', 'oryel', 'oxy', 'peach', 'phase', 'picnic', 'pinkyl',
+              'piyg', 'plasma', 'plotly3', 'portland', 'prgn', 'pubu', 'pubugn',
+              'puor', 'purd', 'purp', 'purples', 'purpor', 'rainbow', 'rdbu',
+              'rdgy', 'rdpu', 'rdylbu', 'rdylgn', 'redor', 'reds', 'solar',
+              'spectral', 'speed', 'sunset', 'sunsetdark', 'teal', 'tealgrn',
+              'tealrose', 'tempo', 'temps', 'thermal', 'tropic', 'turbid',
+              'turbo', 'twilight', 'viridis', 'ylgn', 'ylgnbu', 'ylorbr',
+              'ylorrd']
+
+    colors_dcc = [{'label': i, 'value': i} for i in colors]
+
     layout = html.Div([
         dcc.Location(id='url',
                      refresh=True),  # Обновление после нажатия кнопки сохранить и закрыть (редактирование)
@@ -82,7 +98,10 @@ def serve_layout():
                      refresh=True),  # Обновление после нажатия кнопки сохранить и закрыть (создание)
         html.Div([
             html.H2('Отдел сопровождения пользователей'),
-            html.Img(src="assets/logo.png")
+            # html.Img(src="assets/logo.png")
+            html.A([
+                html.Img(src="assets/logo.png")
+            ], href='#modal-1', className='js-modal-open link')
         ], className="banner"),
         html.Div([
             html.Div([
@@ -180,10 +199,10 @@ def serve_layout():
                                                                                      or i == 'Номер'
                                                                                      or i == 'Описание '
                                                                                      or i == 'Дата'],
-                                                                            sort_action="native",
+                                                                            # sort_action="native",
                                                                             style_table=dict(height='150px',
                                                                                              overflowY='auto'),
-                                                                            fixed_rows=dict(headers=True),
+                                                                            # fixed_rows=dict(headers=True),
                                                                             style_as_list_view=True,
                                                                             cell_selectable=False,
                                                                             style_data=dict(width='20%'),
@@ -265,89 +284,111 @@ def serve_layout():
                                                  className='line_block',
                                                  style=dict(width='46%')),
                                          ]),
-                                     ], selected_style=tab_selected_style),  # tab user
-                             dcc.Tab(label='Информационные системы', value='months', children=[
-                                 html.Br(),
-                                 html.Div([
-                                     html.Table([
-                                         html.Tr([
-                                             html.Td([html.Label(
-                                                 'Подключено сотрудников МБУ ФК к ГИИС "Электронный бюджет"')]),
+                                     ],
+                                     selected_style=tab_selected_style),  # tab user
+                             dcc.Tab(label='Информационные системы',
+                                     value='months',
+                                     children=[
+                                         html.Br(),
+                                         html.Div([
+                                             html.Table([
+                                                 html.Tr([
+                                                     html.Td([html.Label(
+                                                         'Подключено сотрудников МБУ ФК к ГИИС "Электронный бюджет"')]),
+                                                 ]),
+                                                 html.Tr([
+                                                     html.Td([daq.LEDDisplay(id='total_tasks',
+                                                                             value=ld.count_employees(
+                                                                                 conn_string=ld.engine),
+                                                                             color='#222780',
+                                                                             backgroundColor='#e8edff', )
+                                                              ], rowSpan=2),
+                                                 ]),
+                                             ], className='table_budget'),
+                                         ], className='div_table_budget'),
+                                         html.Div([
+                                             html.Br(),
+                                             html.Br(),
+                                             dcc.Link('Полномочия и роли',
+                                                      href='http://10.201.76.42/',
+                                                      target='blank',
+                                                      className='link_bounds')
+                                         ], className='div_bounds'),
+                                         html.Br(),
+                                         html.Br(),
+                                         html.Div([
+                                             html.H3('Количество доступов к подсистемам в разрезе отдела'),
+                                             html.Br(),
+                                             html.Br(),
+                                             dcc.Dropdown(id='unit_choose_inf_sys',
+                                                          options=unit_names,
+                                                          value=unit_names[0]['value'],
+                                                          className="dropdown_choose_unit_inf_sys"),
+                                             dcc.Graph(id='fig_unit_inf_sys'),
+                                             html.H3('Общее количество доступов к подсистемам в разрезе подсистем'),
+                                             dcc.Graph(id='total',
+                                                       figure=fig_total(df=inf_systems_df,
+                                                                        colors=colors_inf_system)),
+                                             html.H3('Тепловая карта доступов к подсистемам в разрезе отделов'),
+                                             html.Br(),
+                                             html.Br(),
+                                             dcc.Dropdown(id='heatmap_colorscales',
+                                                          options=colors_dcc,
+                                                          value=colors_dcc[0]['value'],
+                                                          style=dict(width='40%', padding='0 20px')),
+
+                                             daq.BooleanSwitch(id='reverse_colorscales',
+                                                               label='Invert colors',
+                                                               on=False,
+                                                               style=dict(width='15%')),
+                                             dcc.Graph(id='3')
+                                         ], style=dict(background='#ebecf1'))
+                                     ],
+                                     selected_style=tab_selected_style),  # tab tech
+                             dcc.Tab(label='Сайт',
+                                     value='s',
+                                     children=[
+                                         html.Br(),
+                                         html.Div([dash_table.DataTable(id='site_stat',
+                                                                        columns=[{"name": i, "id": i} for i in
+                                                                                 ['Визиты', 'Посетители',
+                                                                                  'Просмотры', 'Отказы',
+                                                                                  'Глубина просмотра',
+                                                                                  'Время на сайте']],
+                                                                        style_table={'height': '150px'},
+                                                                        style_as_list_view=True,
+                                                                        cell_selectable=False,
+                                                                        tooltip_data=tooltips_table_site,
+                                                                        tooltip_duration=None,
+                                                                        style_cell=dict(textAlign='center',
+                                                                                        overflow='hidden',
+                                                                                        textOverflow='ellipsis',
+                                                                                        maxWidth=0))],
+                                                  className='div_site_stat'),
+                                         html.Div([html.H3('Рейтинг посещаемости разделов сайта',
+                                                           style=dict(padding='20px'))]),
+                                         html.Div([dcc.Graph(id='site_top_fig')],
+                                                  className='line-block',
+                                                  style=dict(width='93%')),
+                                         html.Div([dcc.Graph(id='site_line_graph')],
+                                                  className='line-block',
+                                                  style=dict(width='93%')),
+                                         html.Div([
+                                             html.Div([dcc.Graph(id='el_budget_graph_mean_time')],
+                                                      className='line_block',
+                                                      style=dict(width='46%')),
+                                             html.Div([dcc.Graph(id='el_budget_graph')],
+                                                      className='line_block',
+                                                      style=dict(width='46%')),
+                                             html.Div([dcc.Graph(id='gossluzba_pagedept')],
+                                                      className='line_block',
+                                                      style=dict(width='46%')),
+                                             html.Div([dcc.Graph(id='gossluzba_visits')],
+                                                      className='line_block',
+                                                      style=dict(width='46%'))
                                          ]),
-                                         html.Tr([
-                                             html.Td([daq.LEDDisplay(id='total_tasks',
-                                                                     value=ld.count_employees(conn_string=ld.engine),
-                                                                     color='#222780',
-                                                                     backgroundColor='#e8edff', )
-                                                      ], rowSpan=2),
-                                         ]),
-                                     ], className='table_budget'),
-                                 ], className='div_table_budget'),
-                                 html.Div([
-                                     html.Br(),
-                                     html.Br(),
-                                     dcc.Link('Полномочия и роли',
-                                              href='http://10.201.76.42/',
-                                              target='blank',
-                                              className='link_bounds')
-                                 ], className='div_bounds'),
-                                 html.Br(),
-                                 html.Br(),
-                                 html.Div([
-                                     html.H3('Количество доступов к подсистемам в разрезе отдела'),
-                                     html.Br(),
-                                     html.Br(),
-                                     dcc.Dropdown(id='unit_choose_inf_sys',
-                                                  options=unit_names,
-                                                  value=unit_names[0]['value'],
-                                                  className="dropdown_choose_unit_inf_sys"),
-                                     dcc.Graph(id='fig_unit_inf_sys'),
-                                     html.H3('Общее количество доступов к подсистемам в разрезе подсистем'),
-                                     dcc.Graph(id='total',
-                                               figure=fig_total(df=inf_systems_df,
-                                                                colors=colors_inf_system)),
-                                     html.H3('Тепловая карта доступов к подсистемам в разрезе отделов'),
-                                     dcc.Graph(id='3',
-                                               figure=inf_sys_heatmap(df=inf_systems_df))
-                                 ], style=dict(background='#ebecf1'))
-                             ], selected_style=tab_selected_style),  # tab tech
-                             dcc.Tab(label='Сайт', value='s', children=[
-                                 html.Br(),
-                                 html.Div([dash_table.DataTable(id='site_stat',
-                                                                columns=[{"name": i, "id": i} for i in
-                                                                         ['Визиты', 'Посетители',
-                                                                          'Просмотры', 'Отказы',
-                                                                          'Глубина просмотра',
-                                                                          'Время на сайте']],
-                                                                style_table={'height': '150px'},
-                                                                style_as_list_view=True,
-                                                                cell_selectable=False,
-                                                                tooltip_data=tooltips_table_site,
-                                                                tooltip_duration=None,
-                                                                style_cell=dict(textAlign='center',
-                                                                                overflow='hidden',
-                                                                                textOverflow='ellipsis',
-                                                                                maxWidth=0))],
-                                          className='div_site_stat'),
-                                 html.Div([html.H3('Рейтинг посещаемости разделов сайта',
-                                                   style=dict(padding='20px'))]),
-                                 html.Div([dcc.Graph(id='site_top_fig')]),
-                                 html.Div([dcc.Graph(id='site_line_graph')]),
-                                 html.Div([
-                                     html.Div([dcc.Graph(id='el_budget_graph_mean_time')],
-                                              className='line_block',
-                                              style=dict(width='37%')),
-                                     html.Div([dcc.Graph(id='el_budget_graph')],
-                                              className='line_block',
-                                              style=dict(width='56%')),
-                                     html.Div([dcc.Graph(id='gossluzba_pagedept')],
-                                              className='line_block',
-                                              style=dict(width='46%')),
-                                     html.Div([dcc.Graph(id='gossluzba_visits')],
-                                              className='line_block',
-                                              style=dict(width='46%'))
-                                 ]),
-                             ], selected_style=tab_selected_style),  # tab site
+                                     ],
+                                     selected_style=tab_selected_style),  # tab site
                              dcc.Tab(label='Задачи / проекты',
                                      value='pr',
                                      children=[
@@ -593,7 +634,7 @@ def serve_layout():
                                                                   export_format='xlsx',
                                                                   editable=True,
                                                                   )
-                                         ], className='div_project_table'),
+                                         ], className='div_project_tables'),
                                          html.Br(),
                                          html.Div([
                                              html.H3('Выполненные задачи / проекты',
@@ -627,14 +668,42 @@ def serve_layout():
                                                                        'textAlign': 'center'}],
                                                                   export_format='xlsx'
                                                                   )
-                                         ], className='div_project_table'),
+                                         ], className='div_project_tables'),
                                          html.Br(),
-                                     ], selected_style=tab_selected_style),  # tab projects
-                         ], colors=dict(border='#ebecf1',
-                                        primary='#222780',
-                                        background='#33ccff')),  # main tabs end
+                                     ],
+                                     selected_style=tab_selected_style),  # tab projects
+                         ],
+                         colors=dict(border='#ebecf1',
+                                     primary='#222780',
+                                     background='#33ccff')
+                         ),  # main tabs end
                 html.Div(id='tabs_content')
             ])  # html.div 2
-        ], style=dict(background='#ebecf1'))  # html.div 1
+        ], style=dict(background='#ebecf1')),  # html.div 1
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.Div([
+                        'История изменений'
+                    ], className='modal__dialog-header-content'),
+                    html.Div([
+                        html.Button([
+                            html.Span('x')
+                        ], className='js-modal-close modal__dialog-header-close-btn')
+                    ], className='modal__dialog-header-close')
+                ], className='modal__dialog-header'),
+                html.Div([
+                    html.Br(),
+                    html.Div([
+                        dcc.Textarea(value=ld.read_history_data(), readOnly=True, className='frame-history')
+                    ]),
+                    html.Br(),
+                ], className='modal__dialog-body'),
+                html.Div([
+                    html.Button('Close', className='js-modal-close modal__dialog-footer-close-btn')
+                ], className='modal__dialog-footer')
+            ], className='modal__dialog')
+        ], id='modal-1', className='modal_history modal--l'),
+        html.Script(src='assets/js/main.js'),
     ])  # app layout end
     return layout

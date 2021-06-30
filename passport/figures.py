@@ -3,7 +3,8 @@ import datetime as dt
 import plotly.graph_objects as go
 
 colors_inf_system = ['#5d61a2', '#93cdd1', '#a7d0b8', '#dcdcd7', '#d598a0', '#760043', '#c4b052', '#bb4e51', '#c26ca9',
-          '#0b7fab', '#f4d75e', '#e9723d']
+                     '#0b7fab', '#f4d75e', '#e9723d']
+
 
 def plot_figure_support(first_tp_count_tasks, second_tp_count_tasks, third_tp_count_tasks):
     """
@@ -416,11 +417,12 @@ def fig_total(df, colors):
     return fig
 
 
-def inf_sys_heatmap(df):
+def inf_sys_heatmap(df, value):
     fig_heatmap = go.Figure(data=go.Heatmap(
         z=[df.loc[i].to_list() for i in df.index],
         y=df.index,
-        x=df.columns))
+        x=df.columns,
+        colorscale=value))
     fig_heatmap.update_layout(height=700,
                               legend_xanchor='right',
                               paper_bgcolor='#ebecf1',
@@ -436,7 +438,6 @@ def inf_sys_bar(df, colors, value):
                          text=df.loc[value]))
     fig.update_traces(textposition='auto')
     fig.update_layout(barmode='stack',
-                      # height=1000,
                       legend_xanchor='right',
                       paper_bgcolor='#ebecf1',
                       plot_bgcolor='#ebecf1',

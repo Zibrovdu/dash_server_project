@@ -305,9 +305,9 @@ media screen and (max-width: 650px) {
     margin: 0 auto;
 }
 
-.div_project_table {
-    width: 98%;
-    margin: 0 auto;
+.div_project_tables {
+    width: 97%;
+    padding: 20px;
 }
 
 .H3_work_projects {

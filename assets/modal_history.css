@@ -1,0 +1,150 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); */
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 40px;
+}
+
+.section.section-1 {
+  background-color: #343434;
+}
+
+.section.section-2 {
+  background-color: #2f3061;
+}
+
+.section.section-3 {
+  background-color: #0e34a0;
+}
+
+.link {
+  color: #ffffff;
+}
+
+.link:hover {
+  text-decoration: none;
+}
+
+.modal_history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  background-color: rgba(0,0,0,.4);
+  opacity: 0;
+  transition: .2s;
+}
+
+.modal__dialog {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 80vh;
+  background-color: #ffffff;
+  border-radius: 8px;
+  transition: .2s;
+  transform: translateY(-50px);
+}
+
+.modal__dialog-header {
+  padding: 20px 40px;
+  transition: .2s;
+  display: flex;
+  align-items: center;
+}
+
+.modal__dialog-header-content {
+  flex-grow: 1;
+  font-size: 24px;
+}
+
+.modal__dialog-header-close {
+  display: flex;
+  align-items: center;
+}
+
+.modal__dialog-header-close-btn {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 24px;
+}
+
+.modal__dialog-body {
+  padding: 20px 40px;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.modal__dialog-footer {
+  padding: 20px 40px;
+  transition: .2s;
+}
+
+.modal--s .modal__dialog  {width: 300px;}
+.modal--m .modal__dialog {width: 600px;}
+.modal--l .modal__dialog {width: 900px;}
+
+.modal--screen-height .modal__dialog {max-height: 80vh;}
+
+.modal--active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal--active .modal__dialog {
+  transform: translateY(0);
+}
+
+
+.modal--has-scroll .modal__dialog-header {
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 0 8px rgba(0, 0, 0, .4);
+}
+
+.modal--has-scroll .modal__dialog-footer {
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 0 8px rgba(0,0,0,.4);
+}
+
+.modal__dialog-footer-close-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  line-height: 28px;
+  color: #354663;
+  cursor: pointer;
+  background-color: #ebedee;
+  border: 0;
+  border-radius: 4px;
+  transition: .2s;
+}
+
+.modal__dialog-footer-close-btn:hover {
+  background-color: #d5d9dc;
+}
+
+.frame-history {
+    width: 800px;
+    height: 400px;
+}
