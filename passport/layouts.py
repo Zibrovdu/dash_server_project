@@ -310,7 +310,7 @@ def serve_layout():
                                              html.Br(),
                                              html.Br(),
                                              dcc.Link('Полномочия и роли',
-                                                      href='http://localhost:9060/',
+                                                      href='http://37.110.79.49:9060/', # ПОМЕНЯТЬ АДРЕС
                                                       target='blank',
                                                       className='link_bounds')
                                          ], className='div_bounds'),
