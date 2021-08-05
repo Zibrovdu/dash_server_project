@@ -9,7 +9,7 @@ import dash_table
 import pandas as pd
 
 import passport.load_data as ld
-from passport.figures import fig_total, colors_inf_system, inf_sys_heatmap
+from passport.figures import fig_total, colors_inf_system
 
 
 def serve_layout():
@@ -310,7 +310,7 @@ def serve_layout():
                                              html.Br(),
                                              html.Br(),
                                              dcc.Link('Полномочия и роли',
-                                                      href='http://37.110.79.49:9060/', # ПОМЕНЯТЬ АДРЕС
+                                                      href='http://37.110.79.49:9060/',  # ПОМЕНЯТЬ АДРЕС
                                                       target='blank',
                                                       className='link_bounds')
                                          ], className='div_bounds'),
