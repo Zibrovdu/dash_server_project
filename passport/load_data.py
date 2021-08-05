@@ -468,6 +468,27 @@ def get_months(start_month, start_year, finish_month, finish_year):
     end_period = [{"label": f'{get_period_month(year=finish_year, month=i)}', "value": i}
                   for i in range(1, finish_month + 1)]
 
+    if finish_year - start_year <= 1:
+        for item in end_period:
+            start_period.append(item)
+        start_period.reverse()
+
+        return start_period
+
+    else:
+        years_list = []
+        for count in range(1, (finish_year - start_year)):
+            years_list.insert(count, start_year + count)
+
+        addition_period = []
+        for year in years_list:
+            addition_period.append(
+                [{"label": f'{get_period_month(year=year, month=i)}', "value": str(i) + '_' + str(year)} for i in
+                 range(1, 13)])
+
+    for period in addition_period:
+        for item in period:
+            start_period.append(item)
     for item in end_period:
         start_period.append(item)
     start_period.reverse()
@@ -1063,3 +1084,7 @@ def read_history_data():
         for line in history_text_file:
             history_data += line
         return history_data
+
+
+def load_svr_codes():
+    return pd.read_sql('svr_codes', con=engine)
