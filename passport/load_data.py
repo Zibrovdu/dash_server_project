@@ -1071,8 +1071,8 @@ def count_employees(conn_string):
 
 def load_inf_sys_data(conn_string):
     df = pd.read_sql('inf_systems', con=conn_string)
-    df = df.groupby(['curr_unit']).count()
-    df.drop(['№ П/П', 'ФИО СОТРУДНИКОВ МБУ', 'index', 'curr_name', 'curr_descr', 'status', 'correct_name', 'is_true'],
+    df = df.groupby(['unit']).count()
+    df.drop(['№ П/П', 'ФИО СОТРУДНИКОВ МБУ', 'name', 'correct_name', 'is_true', 'hire_date', 'fire_date'],
             axis=1, inplace=True)
 
     return df
@@ -1084,7 +1084,3 @@ def read_history_data():
         for line in history_text_file:
             history_data += line
         return history_data
-
-
-def load_svr_codes():
-    return pd.read_sql('svr_codes', con=engine)

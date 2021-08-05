@@ -409,7 +409,6 @@ def fig_total(df, colors):
                              text=str(df[df.columns[i]].sum()),
                              textposition='inside'))
         fig.update_layout(barmode='stack',
-                          # height=1000,
                           legend_xanchor='right',
                           paper_bgcolor='#ebecf1',
                           plot_bgcolor='#ebecf1',

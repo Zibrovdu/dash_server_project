@@ -454,14 +454,6 @@ def register_callbacks(app):
 
         return fig
 
-    # @app.callback(
-    #     Output('3', 'figure'),
-    #     Input('heatmap_colorscales', 'value'))
-    # def change_colorscales_heatmap(value):
-    #     inf_systems_df = ld.load_inf_sys_data(conn_string=ld.engine)
-    #     figure = inf_sys_heatmap(df=inf_systems_df, value=value)
-    #     return figure
-
     @app.callback(
         Output('3', 'figure'),
         Input('reverse_colorscales', 'on'),

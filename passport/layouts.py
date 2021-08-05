@@ -169,7 +169,7 @@ def serve_layout():
                                                  html.Tr([
                                                      html.Td([html.Label('Количество обращений'), ]),
                                                      html.Td(html.Label('Количество пользователей')),
-                                                     html.Td('Среднее время решения',
+                                                     html.Td('Время решения',
                                                              colSpan=3)
                                                  ]),
                                                  html.Tr([
