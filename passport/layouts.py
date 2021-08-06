@@ -151,6 +151,7 @@ def serve_layout():
                                                     start_date=dt.date(ld.end_year, ld.end_month, ld.end_day),
                                                     end_date=dt.date(ld.current_year, ld.current_month, ld.current_day),
                                                     updatemode='bothdates',
+                                                    first_day_of_week=1,
                                                     style=dict(background='#b1d5fa'),
                                                     clearable=False
                                                     )])], className='bblock',
@@ -310,7 +311,7 @@ def serve_layout():
                                              html.Br(),
                                              html.Br(),
                                              dcc.Link('Полномочия и роли',
-                                                      href='http://37.110.79.49:9060/',  # ПОМЕНЯТЬ АДРЕС
+                                                      href='http://10.201.76.42',  # ПОМЕНЯТЬ АДРЕС
                                                       target='blank',
                                                       className='link_bounds')
                                          ], className='div_bounds'),
@@ -458,6 +459,7 @@ def serve_layout():
                                                              dcc.DatePickerSingle(id='date_pr',
                                                                                   min_date_allowed=dt.date.today(),
                                                                                   display_format='DD-MM-YYYY',
+                                                                                  first_day_of_week=1,
                                                                                   style=dict(float='left')),
                                                              html.Span(id='fill_project_end_date',
                                                                        style=dict(color="#ebecf1")),
@@ -543,6 +545,7 @@ def serve_layout():
                                                           dcc.DatePickerSingle(id='date_pr_modify',
                                                                                min_date_allowed=dt.date.today(),
                                                                                display_format='DD-MM-YYYY',
+                                                                               first_day_of_week=1,
                                                                                style=dict(float='left')),
                                                           html.Span(id='modify_project_end_date',
                                                                     style=dict(color='white')),
@@ -551,6 +554,7 @@ def serve_layout():
                                                           html.H5('Фактическая дата выполнения:'),
                                                           dcc.DatePickerSingle(id='fact_date_pr_modify',
                                                                                display_format='DD-MM-YYYY',
+                                                                               first_day_of_week=1,
                                                                                disabled=True,
                                                                                style=dict(float='left')),
                                                           html.Span(id='modify_project_fact_date',
