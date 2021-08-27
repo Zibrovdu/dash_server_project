@@ -124,7 +124,7 @@ def serve_layout():
                                                  options=d_month,
                                                  searchable=False,
                                                  clearable=False,
-                                                 value=finish_month,
+                                                 value='_'.join([str(finish_month), str(finish_year)]),
                                                  disabled=False
                                                  )],
                                    className='wrapper-dropdown-3',
@@ -134,7 +134,7 @@ def serve_layout():
                                              options=d_week,
                                              searchable=False,
                                              clearable=False,
-                                             value=finish_week,
+                                             value='_'.join([str(finish_week), str(finish_year)]),
                                              style=dict(width='100%',
                                                         heigth='60px'),
                                              disabled=False

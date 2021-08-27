@@ -63,64 +63,85 @@ def register_callbacks(app):
          ])
     def update_figure_user(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
 
+        week, week_year = int(choosen_week[:2]), int(choosen_week[3:])
+
+        if len(choosen_month) == 6:
+            month, month_year = int(choosen_month[:1]), int(choosen_month[2:])
+        else:
+            month, month_year = int(choosen_month[:2]), int(choosen_month[3:])
+
         period_choice, week_choice, month_choice = ld.choosen_type(type_period=choice_type_period,
                                                                    start_date=start_date_user,
                                                                    end_date=end_date_user,
-                                                                   ch_month=choosen_month,
-                                                                   ch_week=choosen_week)
+                                                                   ch_month=month,
+                                                                   ch_week=week)
 
         etsp_filtered_df = ld.get_filtered_df(table_name=lc.etsp_table_name,
                                               start_date=start_date_user,
                                               end_date=end_date_user,
-                                              ch_month=choosen_month,
-                                              ch_week=choosen_week,
+                                              month=month,
+                                              month_year=month_year,
+                                              week=week,
+                                              week_year=week_year,
                                               type_period=choice_type_period)
 
         sue_filtered_df = ld.get_filtered_df(table_name=lc.sue_table_name,
                                              start_date=start_date_user,
                                              end_date=end_date_user,
-                                             ch_month=choosen_month,
-                                             ch_week=choosen_week,
+                                             month=month,
+                                             month_year=month_year,
+                                             week=week,
+                                             week_year=week_year,
                                              type_period=choice_type_period)
 
         osp_filtered_df = ld.get_filtered_df(table_name=lc.osp_table_name,
                                              start_date=start_date_user,
                                              end_date=end_date_user,
-                                             ch_month=choosen_month,
-                                             ch_week=choosen_week,
+                                             month=month,
+                                             month_year=month_year,
+                                             week=week,
+                                             week_year=week_year,
                                              type_period=choice_type_period)
 
         sue_incidents_filtered_df = ld.get_filtered_incidents_df(start_date=start_date_user,
                                                                  end_date=end_date_user,
-                                                                 ch_month=choosen_month,
-                                                                 ch_week=choosen_week,
+                                                                 month=month,
+                                                                 month_year=month_year,
+                                                                 week=week,
+                                                                 week_year=week_year,
                                                                  type_period=choice_type_period)
 
         etsp_prev_filt_df = ld.get_prev_filtered_df(table_name=lc.etsp_table_name,
                                                     start_date=start_date_user,
                                                     end_date=end_date_user,
-                                                    ch_month=choosen_month,
-                                                    ch_week=choosen_week,
+                                                    month=month,
+                                                    month_year=month_year,
+                                                    week=week,
+                                                    week_year=week_year,
                                                     type_period=choice_type_period)
 
         sue_prev_filt_df = ld.get_prev_filtered_df(table_name=lc.sue_table_name,
                                                    start_date=start_date_user,
                                                    end_date=end_date_user,
-                                                   ch_month=choosen_month,
-                                                   ch_week=choosen_week,
+                                                   month=month,
+                                                   month_year=month_year,
+                                                   week=week,
+                                                   week_year=week_year,
                                                    type_period=choice_type_period)
 
         osp_prev_filt_df = ld.get_prev_filtered_df(table_name=lc.osp_table_name,
                                                    start_date=start_date_user,
                                                    end_date=end_date_user,
-                                                   ch_month=choosen_month,
-                                                   ch_week=choosen_week,
+                                                   month=month,
+                                                   month_year=month_year,
+                                                   week=week,
+                                                   week_year=week_year,
                                                    type_period=choice_type_period)
 
         start_date_metrika, end_date_metrika = ld.get_date_for_metrika_df(start_date=start_date_user,
                                                                           end_date=end_date_user,
-                                                                          ch_month=choosen_month,
-                                                                          ch_week=choosen_week,
+                                                                          ch_month=month,
+                                                                          ch_week=week,
                                                                           type_period=choice_type_period)
 
         filtered_metrika_df = si.get_site_info(start_date=start_date_metrika,

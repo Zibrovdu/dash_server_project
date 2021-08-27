@@ -397,13 +397,37 @@ def get_weeks(start_week, start_year, finish_week, finish_year):
     last_week_of_start_year = date(start_year, 12, 31).isocalendar()[1]
 
     start_period = [{"label": f'Неделя {i} ({get_period(year=start_year, week=i)})',
-                     "value": i} for i in range(start_week, last_week_of_start_year + 1)]
-    end_period = [{"label": f'Неделя {i} ({get_period(year=finish_year, week=i)})', "value": i}
-                  for i in range(1, finish_week + 1)]
+                     "value": "_".join([str(i), str(start_year)])} for i in
+                    range(start_week, last_week_of_start_year + 1)]
+    end_period = [
+        {"label": f'Неделя {i} ({get_period(year=finish_year, week=i)})', "value": "_".join([str(i), str(finish_year)])}
+        for i in range(1, finish_week + 1)]
 
-    for item in end_period:
-        start_period.append(item)
-    start_period.reverse()
+    if finish_year - start_year <= 1:
+        for item in end_period:
+            start_period.append(item)
+        start_period.reverse()
+    else:
+        years_dict = {}
+        for count in range(1, (finish_year - start_year)):
+            if date(start_year + count, 12, 31).isocalendar()[2] < 4:
+                years_dict[start_year + count] = date(start_year + count, 12, 31 - date(start_year + count, 12, 31).
+                                                      isocalendar()[2]).isocalendar()[1]
+            else:
+                years_dict[start_year + count] = date(start_year + count, 12, 31).isocalendar()[1]
+
+        addition_period = []
+        for year in years_dict.keys():
+            addition_period.append(
+                [{"label": f'Неделя {i} ({get_period(year=year, week=i)})', "value": "_".join([str(i), str(year)])}
+                 for i in range(1, years_dict[year] + 1)])
+
+        for period in addition_period:
+            for item in period:
+                start_period.append(item)
+        for item in end_period:
+            start_period.append(item)
+        start_period.reverse()
 
     return start_period
 
@@ -463,35 +487,34 @@ def get_months(start_month, start_year, finish_month, finish_year):
     ----------
         **List**
     """
-    start_period = [{"label": f'{get_period_month(year=start_year, month=i)}', "value": i}
-                    for i in range(start_month, 13)]
-    end_period = [{"label": f'{get_period_month(year=finish_year, month=i)}', "value": i}
-                  for i in range(1, finish_month + 1)]
+    start_period = [
+        {"label": f'{get_period_month(year=start_year, month=i)}', "value": "_".join([str(i), str(start_year)])}
+        for i in range(start_month, 13)]
+    end_period = [
+        {"label": f'{get_period_month(year=finish_year, month=i)}', "value": "_".join([str(i), str(finish_year)])}
+        for i in range(1, finish_month + 1)]
 
     if finish_year - start_year <= 1:
         for item in end_period:
             start_period.append(item)
         start_period.reverse()
-
-        return start_period
-
     else:
         years_list = []
-        for count in range(1, (finish_year - start_year)):
+        for count in range(1, finish_year - start_year):
             years_list.insert(count, start_year + count)
 
         addition_period = []
         for year in years_list:
             addition_period.append(
-                [{"label": f'{get_period_month(year=year, month=i)}', "value": str(i) + '_' + str(year)} for i in
+                [{"label": f'{get_period_month(year=year, month=i)}', "value": "_".join([str(i), str(year)])} for i in
                  range(1, 13)])
 
-    for period in addition_period:
-        for item in period:
+        for period in addition_period:
+            for item in period:
+                start_period.append(item)
+        for item in end_period:
             start_period.append(item)
-    for item in end_period:
-        start_period.append(item)
-    start_period.reverse()
+        start_period.reverse()
 
     return start_period
 
@@ -707,7 +730,7 @@ def get_date_for_metrika_df(start_date, end_date, ch_month, ch_week, type_period
     return start_date_metrika, end_date_metrika
 
 
-def get_filtered_df(table_name, start_date, end_date, ch_month, ch_week, type_period):
+def get_filtered_df(table_name, start_date, end_date, month, month_year, week, week_year, type_period):
     """
     Синтаксис:
     ----------
@@ -747,7 +770,9 @@ def get_filtered_df(table_name, start_date, end_date, ch_month, ch_week, type_pe
         df = pd.read_sql(f"""
             SELECT * 
             FROM {table_name} 
-            WHERE month_open = {int(ch_month)}""", con=engine)
+            WHERE EXTRACT(month from reg_date) = {int(month)}
+            AND EXTRACT(year from reg_date) = {int(month_year)}
+    """, con=engine)
         df.timedelta = pd.to_timedelta(df.timedelta)
         return df
 
@@ -764,13 +789,14 @@ def get_filtered_df(table_name, start_date, end_date, ch_month, ch_week, type_pe
         df = pd.read_sql(f"""
             SELECT * 
             FROM {table_name} 
-            WHERE week_open = {int(ch_week)}
+            WHERE EXTRACT(year from reg_date) = {week_year}
+            AND EXTRACT(week from reg_date) = {week}
         """, con=engine)
         df.timedelta = pd.to_timedelta(df.timedelta)
         return df
 
 
-def get_prev_filtered_df(table_name, start_date, end_date, ch_month, ch_week, type_period):
+def get_prev_filtered_df(table_name, start_date, end_date, month, month_year, week, week_year, type_period):
     """
     Синтаксис:
     ----------
@@ -811,11 +837,12 @@ def get_prev_filtered_df(table_name, start_date, end_date, ch_month, ch_week, ty
         **DataFrame**
     """
     if type_period == 'm':
-        if int(ch_month) > 1:
+        if int(month) > 1:
             df = pd.read_sql(f"""
                 SELECT * 
                 FROM {table_name} 
-                WHERE month_open = {int(ch_month) - 1}
+                WHERE EXTRACT(month from reg_date) = {int(month)- 1}
+                AND EXTRACT(year from reg_date) = {int(month_year)}
             """, con=engine)
             df.timedelta = pd.to_timedelta(df.timedelta)
             return df
@@ -823,7 +850,8 @@ def get_prev_filtered_df(table_name, start_date, end_date, ch_month, ch_week, ty
             df = pd.read_sql(f"""
                 SELECT * 
                 FROM {table_name} 
-                WHERE month_open = 12
+                WHERE EXTRACT(month from reg_date) = 12
+                AND EXTRACT(year from reg_date) = {int(month_year)}
             """, con=engine)
             df.timedelta = pd.to_timedelta(df.timedelta)
             return df
@@ -842,11 +870,12 @@ def get_prev_filtered_df(table_name, start_date, end_date, ch_month, ch_week, ty
         return df
 
     else:
-        if int(ch_week) > 1:
+        if int(week) > 1:
             df = pd.read_sql(f"""
                 SELECT * 
                 FROM {table_name} 
-                WHERE week_open = {int(ch_week) - 1}
+                WHERE EXTRACT(year from reg_date) = {week_year}
+                AND EXTRACT(week from reg_date) = {week - 1}
             """, con=engine)
             df.timedelta = pd.to_timedelta(df.timedelta)
             return df
@@ -854,13 +883,14 @@ def get_prev_filtered_df(table_name, start_date, end_date, ch_month, ch_week, ty
             df = pd.read_sql(f"""
                 SELECT * 
                 FROM {table_name} 
-                WHERE week_open = {52}
+                WHERE EXTRACT(year from reg_date) = {week_year}
+                AND EXTRACT(week from reg_date) = {52}
             """, con=engine)
             df.timedelta = pd.to_timedelta(df.timedelta)
             return df
 
 
-def get_filtered_incidents_df(start_date, end_date, ch_month, ch_week, type_period):
+def get_filtered_incidents_df(start_date, end_date, month, month_year, week, week_year, type_period):
     """
     Синтаксис:
     ----------
@@ -903,7 +933,8 @@ def get_filtered_incidents_df(start_date, end_date, ch_month, ch_week, type_peri
             SELECT * 
             FROM sue_data 
             WHERE (status = 'Проблема' or status = 'Массовый инцидент') 
-                AND month_open = {int(ch_month)}
+                AND EXTRACT(month from reg_date) = {int(month)}
+                AND EXTRACT(year from reg_date) = {int(month_year)}
         """, con=engine)
         df.timedelta = pd.to_timedelta(df.timedelta)
         df.columns = ['Дата обращения', 'Тип', 'Номер', 'Описание', 'Плановое время', 'Фактическое время',
@@ -932,7 +963,8 @@ def get_filtered_incidents_df(start_date, end_date, ch_month, ch_week, type_peri
             SELECT * 
             FROM sue_data 
             WHERE (status = 'Проблема' or status = 'Массовый инцидент')
-                AND week_open = {int(ch_week)}
+                AND EXTRACT(year from reg_date) = {week_year}
+                AND EXTRACT(week from reg_date) = {week}
         """, con=engine)
         df.timedelta = pd.to_timedelta(df.timedelta)
         df.columns = ['Дата обращения', 'Тип', 'Номер', 'Описание', 'Плановое время', 'Фактическое время',
