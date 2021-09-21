@@ -70,6 +70,7 @@ def serve_layout():
     complete_projects_df = complete_projects_df[['id', 'name', 'executor', 'persent', 'stage', 'fact_date', 'duration']]
     complete_projects_df.columns = ['Номер', 'Название', 'Исполнитель', 'Процент выполнения', 'Описание',
                                     'Дата выполнения', 'Длительность']
+    # complete_projects_df.sort_values('start_date', ascending=False, inplace=True)
 
     osp_staff_projects = ld.get_osp_names_projects()
 

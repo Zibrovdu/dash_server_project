@@ -117,9 +117,14 @@ def top_user(df):
     -------
         **DataFrame**
     """
-    top_user_df = df[(df.unit != 'Отдел сопровождения пользователей') & (df.unit != 'ЦОКР') & (
-            df.user != 'Кондрашова Ирина Сергеевна') & (df.unit != '19. Отдел сопровождения пользователей') & (
-            df.user != 'Вельмякин Николай Валерьевич')]
+    top_user_df = df[(df.unit != 'Отдел сопровождения пользователей') &
+                     (df.unit != 'ЦОКР') &
+                     (df.user != 'Кондрашова Ирина Сергеевна') &
+                     (df.unit != '19. Отдел сопровождения пользователей') &
+                     (df.user != 'Вельмякин Николай Валерьевич') &
+                     (df.unit != 'Отдел информационно-технологического сопровождения централизованной бухгалтерии') &
+                     (df.user != 'Фролов Леонид Сергеевич')
+    ]
     top_user_df = pd.DataFrame(top_user_df.groupby('user')['count_task'].sum().sort_values(ascending=False).head()
                                .reset_index()).rename(columns={'user': 'Пользователь', 'count_task': 'Обращения'})
     return top_user_df
@@ -562,6 +567,7 @@ def load_projects(projects_status='in_progress', project_name='all'):
             FROM projects_new 
             WHERE persent < 100
                 AND name ='{project_name}'
+                
         """, con=engine)
 
     elif projects_status == 'complete':
