@@ -123,8 +123,10 @@ def top_user(df):
                      (df.unit != '19. Отдел сопровождения пользователей') &
                      (df.user != 'Вельмякин Николай Валерьевич') &
                      (df.unit != 'Отдел информационно-технологического сопровождения централизованной бухгалтерии') &
-                     (df.user != 'Фролов Леонид Сергеевич')
-    ]
+                     (df.user != 'Фролов Леонид Сергеевич') &
+                     (df.user != 'Тех. поддержка') &
+                     (df.user != 'Тимофеев Кирилл Эдуардович')
+                     ]
     top_user_df = pd.DataFrame(top_user_df.groupby('user')['count_task'].sum().sort_values(ascending=False).head()
                                .reset_index()).rename(columns={'user': 'Пользователь', 'count_task': 'Обращения'})
     return top_user_df
@@ -847,7 +849,7 @@ def get_prev_filtered_df(table_name, start_date, end_date, month, month_year, we
             df = pd.read_sql(f"""
                 SELECT * 
                 FROM {table_name} 
-                WHERE EXTRACT(month from reg_date) = {int(month)- 1}
+                WHERE EXTRACT(month from reg_date) = {int(month) - 1}
                 AND EXTRACT(year from reg_date) = {int(month_year)}
             """, con=engine)
             df.timedelta = pd.to_timedelta(df.timedelta)
