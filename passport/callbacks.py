@@ -63,7 +63,10 @@ def register_callbacks(app):
          ])
     def update_figure_user(start_date_user, end_date_user, choosen_month, choosen_week, choice_type_period):
 
-        week, week_year = int(choosen_week[:2]), int(choosen_week[3:])
+        if len(choosen_week) == 7:
+            week, week_year = int(choosen_week[:2]), int(choosen_week[3:])
+        else:
+            week, week_year = int(choosen_week[:1]), int(choosen_week[2:])
 
         if len(choosen_month) == 6:
             month, month_year = int(choosen_month[:1]), int(choosen_month[2:])
